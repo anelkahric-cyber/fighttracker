@@ -1,0 +1,759 @@
+<meta charset="utf-8">
+<title>Fight Tracker</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Fight Tracker">
+<meta name="theme-color" content="#141414">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAAE3ElEQVR4nO3cv4scdRjH8We99QiCXmNSxC6JREJQRAgWQsATo0WIXZoUKnj4J+QPSCUEG0GwFQQry1RJYyGWIdiJreGMZ85LLhfJ7lpMuKy5fMb58f3OPM/M+9XcFXMzQ573zW125zuTm8dPGfAsz/V9AvBrWnxZ397s9zzG7Prakb5P4dm4cvTP7W8mcbjgsw/i8MJhH8ThiLc+iMMXV30Qhzt++iAOj5z0QRxOeeiDOPzqvQ/icK3fPojDux77II4A+uqDOGLopQ/iCKP7Pogjko77II5guuyDOOLprA/iCKmbPogjqg76II7AcvdBHLFl7YM4wsvXB3EMQaY+iGMg1rc3kydCHIOStg/iGJqEfRDHAKXqgziGKUkfxDFY7fsgjiFr2QdxDFybPohj+Br3QRyj0KwP4hiLBn0Qx4jU7YM4xqVWH8QxOtX7II4xqtgHcYxUlT6IY7z+tw/iGLXyPohj7Er6IA7IPogDZqIP4sBjB/sgDjzxVB/Egf9Y7oM48LT9PogDEnFAIg5IxAGJOCARByTigEQckKZ9n8ATX1794sKF890fd2dn5403zxTfHz788s8//dj9OSivnjw9m836OjpXDkjEYas22bDpx54uovs+s+mGTfsaEnFAIg5IxAGJOCARBySPL9GVxXy+u/VX8t0+3Lm3//1sNr9z58+J2aE6e1hZXT300ovl2zy4e3f+qPY7Fgtb1P2RhCLF8ffvt78+ey7rIba2ts68/c4LZpfq/Mu89sH7H311tXyb7z/5/PatX9qdXdcixVFYmO1l2O0/S7+jc7MHdX72YeUt96zJpaCvq0e8OO6bfWePsh5iz+zbOof40GYXq215zWZ/9PqXohZekEIiDkjEAYk4IBEHJOKARByQiAMScUAiDkjEAYk4IBEHJOKAFOkj+7VXjl7+9ZaZXUm629Ovv7W7u5t0lwPBlQMScdinNt2w6fN9n4ZDxAGJOCARByTigEQckCK9z5FpxdtiMU++z2GIFEcHK96wLFIchUwr3sKsNOpQvDg6WPGGAi9IIREHJOKARByQiAMScUAiDkjEAYk4IBEHJOKARByQiAMScUAiDkjEAYk4IE1uHj9lZuvbm32fyWPv2soJm5RscM/rnWDHbPKerZRv80OQZ59fXztiXDlQwt09pDdsdqPvc2jmN1t84/KS1hhXDkjEAYk4IBEHJOKARByQiAMScUAiDkjEAYk4IBEHJOKARByQiANS3jiKG4oQVMY4ijLoI65ccSw3QR9BZYnjYA30EVH6OFQH9BFO4jjKC6CPWFLGUWX29BFIsjiqT50+okgTR91500cICeJoNmn68K9tHG1mTB/OtYqj/XTpw7PmcaSaK3241TCOtBOlD5+axJFjlvThUO048k2RPrypF0fu+dGHK/XiyP10KD9Pn4I1+LOSb36U4U2TF6Q5pkgZDjX8r2zaWVKGT83fBEs1Ucpwq9Xb5+3nShmetf3grc10KcO5BB/ZN5sxZfiX5mafupOmjBCS3SZYfd6UEUXKG4yrTJ0yAkm8NKF89pQRS/pFTaoAyggny3LIgx1QRkS5FlIv10AZQWV8BEPRBGXElffhLZQRGo99gkQckIgDEnFAIg5IxAGJOCARByTigEQckIgDEnFAmhZfWN6Og7hyQPoXjJ5B/sMQHX0AAAAASUVORK5CYII=">
+<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAAE3ElEQVR4nO3cv4scdRjH8We99QiCXmNSxC6JREJQRAgWQsATo0WIXZoUKnj4J+QPSCUEG0GwFQQry1RJYyGWIdiJreGMZ85LLhfJ7lpMuKy5fMb58f3OPM/M+9XcFXMzQ573zW125zuTm8dPGfAsz/V9AvBrWnxZ397s9zzG7Prakb5P4dm4cvTP7W8mcbjgsw/i8MJhH8ThiLc+iMMXV30Qhzt++iAOj5z0QRxOeeiDOPzqvQ/icK3fPojDux77II4A+uqDOGLopQ/iCKP7Pogjko77II5guuyDOOLprA/iCKmbPogjqg76II7AcvdBHLFl7YM4wsvXB3EMQaY+iGMg1rc3kydCHIOStg/iGJqEfRDHAKXqgziGKUkfxDFY7fsgjiFr2QdxDFybPohj+Br3QRyj0KwP4hiLBn0Qx4jU7YM4xqVWH8QxOtX7II4xqtgHcYxUlT6IY7z+tw/iGLXyPohj7Er6IA7IPogDZqIP4sBjB/sgDjzxVB/Egf9Y7oM48LT9PogDEnFAIg5IxAGJOCARByTigEQckKZ9n8ATX1794sKF890fd2dn5403zxTfHz788s8//dj9OSivnjw9m836OjpXDkjEYas22bDpx54uovs+s+mGTfsaEnFAIg5IxAGJOCARBySPL9GVxXy+u/VX8t0+3Lm3//1sNr9z58+J2aE6e1hZXT300ovl2zy4e3f+qPY7Fgtb1P2RhCLF8ffvt78+ey7rIba2ts68/c4LZpfq/Mu89sH7H311tXyb7z/5/PatX9qdXdcixVFYmO1l2O0/S7+jc7MHdX72YeUt96zJpaCvq0e8OO6bfWePsh5iz+zbOof40GYXq215zWZ/9PqXohZekEIiDkjEAYk4IBEHJOKARByQiAMScUAiDkjEAYk4IBEHJOKAFOkj+7VXjl7+9ZaZXUm629Ovv7W7u5t0lwPBlQMScdinNt2w6fN9n4ZDxAGJOCARByTigEQckCK9z5FpxdtiMU++z2GIFEcHK96wLFIchUwr3sKsNOpQvDg6WPGGAi9IIREHJOKARByQiAMScUAiDkjEAYk4IBEHJOKARByQiAMScUAiDkjEAYk4IE1uHj9lZuvbm32fyWPv2soJm5RscM/rnWDHbPKerZRv80OQZ59fXztiXDlQwt09pDdsdqPvc2jmN1t84/KS1hhXDkjEAYk4IBEHJOKARByQiAMScUAiDkjEAYk4IBEHJOKARByQiANS3jiKG4oQVMY4ijLoI65ccSw3QR9BZYnjYA30EVH6OFQH9BFO4jjKC6CPWFLGUWX29BFIsjiqT50+okgTR91500cICeJoNmn68K9tHG1mTB/OtYqj/XTpw7PmcaSaK3241TCOtBOlD5+axJFjlvThUO048k2RPrypF0fu+dGHK/XiyP10KD9Pn4I1+LOSb36U4U2TF6Q5pkgZDjX8r2zaWVKGT83fBEs1Ucpwq9Xb5+3nShmetf3grc10KcO5BB/ZN5sxZfiX5mafupOmjBCS3SZYfd6UEUXKG4yrTJ0yAkm8NKF89pQRS/pFTaoAyggny3LIgx1QRkS5FlIv10AZQWV8BEPRBGXElffhLZQRGo99gkQckIgDEnFAIg5IxAGJOCARByTigEQckIgDEnFAmhZfWN6Og7hyQPoXjJ5B/sMQHX0AAAAASUVORK5CYII=">
+<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%20%22Fight%20Tracker%22%2C%20%22short_name%22%3A%20%22Fight%22%2C%20%22start_url%22%3A%20%22.%22%2C%20%22display%22%3A%20%22standalone%22%2C%20%22background_color%22%3A%20%22%23141414%22%2C%20%22theme_color%22%3A%20%22%23141414%22%2C%20%22icons%22%3A%20%5B%7B%22src%22%3A%20%22data%3Aimage/png%3Bbase64%2CiVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAAE3ElEQVR4nO3cv4scdRjH8We99QiCXmNSxC6JREJQRAgWQsATo0WIXZoUKnj4J%2BQPSCUEG0GwFQQry1RJYyGWIdiJreGMZ85LLhfJ7lpMuKy5fMb58f3OPM/M%2B9XcFXMzQ573zW125zuTm8dPGfAsz/V9AvBrWnxZ397s9zzG7Prakb5P4dm4cvTP7W8mcbjgsw/i8MJhH8ThiLc%2BiMMXV30Qhzt%2B%2BiAOj5z0QRxOeeiDOPzqvQ/icK3fPojDux77II4A%2BuqDOGLopQ/iCKP7Pogjko77II5guuyDOOLprA/iCKmbPogjqg76II7AcvdBHLFl7YM4wsvXB3EMQaY%2BiGMg1rc3kydCHIOStg/iGJqEfRDHAKXqgziGKUkfxDFY7fsgjiFr2QdxDFybPohj%2BBr3QRyj0KwP4hiLBn0Qx4jU7YM4xqVWH8QxOtX7II4xqtgHcYxUlT6IY7z%2Btw/iGLXyPohj7Er6IA7IPogDZqIP4sBjB/sgDjzxVB/Egf9Y7oM48LT9PogDEnFAIg5IxAGJOCARByTigEQckKZ9n8ATX1794sKF890fd2dn5403zxTfHz788s8//dj9OSivnjw9m836OjpXDkjEYas22bDpx54uovs%2Bs%2BmGTfsaEnFAIg5IxAGJOCARBySPL9GVxXy%2Bu/VX8t0%2B3Lm3//1sNr9z58%2BJ2aE6e1hZXT300ovl2zy4e3f%2BqPY7Fgtb1P2RhCLF8ffvt78%2Bey7rIba2ts68/c4LZpfq/Mu89sH7H311tXyb7z/5/PatX9qdXdcixVFYmO1l2O0/S7%2Bjc7MHdX72YeUt96zJpaCvq0e8OO6bfWePsh5iz%2BzbOof40GYXq215zWZ/9PqXohZekEIiDkjEAYk4IBEHJOKARByQiAMScUAiDkjEAYk4IBEHJOKAFOkj%2B7VXjl7%2B9ZaZXUm629Ovv7W7u5t0lwPBlQMScdinNt2w6fN9n4ZDxAGJOCARByTigEQckCK9z5FpxdtiMU%2B%2Bz2GIFEcHK96wLFIchUwr3sKsNOpQvDg6WPGGAi9IIREHJOKARByQiAMScUAiDkjEAYk4IBEHJOKARByQiAMScUAiDkjEAYk4IE1uHj9lZuvbm32fyWPv2soJm5RscM/rnWDHbPKerZRv80OQZ59fXztiXDlQwt09pDdsdqPvc2jmN1t84/KS1hhXDkjEAYk4IBEHJOKARByQiAMScUAiDkjEAYk4IBEHJOKARByQiANS3jiKG4oQVMY4ijLoI65ccSw3QR9BZYnjYA30EVH6OFQH9BFO4jjKC6CPWFLGUWX29BFIsjiqT50%2BokgTR91500cICeJoNmn68K9tHG1mTB/OtYqj/XTpw7PmcaSaK3241TCOtBOlD5%2BaxJFjlvThUO048k2RPrypF0fu%2BdGHK/XiyP10KD9Pn4I1%2BLOSb36U4U2TF6Q5pkgZDjX8r2zaWVKGT83fBEs1Ucpwq9Xb5%2B3nShmetf3grc10KcO5BB/ZN5sxZfiX5mafupOmjBCS3SZYfd6UEUXKG4yrTJ0yAkm8NKF89pQRS/pFTaoAyggny3LIgx1QRkS5FlIv10AZQWV8BEPRBGXElffhLZQRGo99gkQckIgDEnFAIg5IxAGJOCARByTigEQckIgDEnFAmhZfWN6Og7hyQPoXjJ5B/sMQHX0AAAAASUVORK5CYII%3D%22%2C%20%22sizes%22%3A%20%22180x180%22%2C%20%22type%22%3A%20%22image/png%22%7D%2C%20%7B%22src%22%3A%20%22data%3Aimage/png%3Bbase64%2CiVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAIAAAB7GkOtAAANOUlEQVR4nO3dvYulZx3H4XvXKcRmsdkiVSD4QrRTQRKwMOg/INqI6UyR/0AQYiFoFcEoglhZKtYWsgSmSUJECYQkEoOSIubFsK4IJpCdY7FrMrM7M3tm5jzPfd%2B/73WVZ4v5PWcn30/O7sBeeuGBBxsAeS73PgCAPgQAIJQAAIQSAIBQAgAQau/ulx658fb6dwAFXLtytfcJnIFPAMDO%2BN/HuQgAsEsaMBEBAHZMA2YhAMDuacAUBABYhAaMTwCApWjA4AQAWJAGjEwAgGVpwLAEAFicBoxJAIA1aMCABABYiQaMRgCA9WjAUAQAWJUGjEMAgLVpwCAEAOhAA0YgAEAfGtCdAADdaEBfAgD0pAEdCQDQmQb0IgBAfxrQhQAAQ9CA9QkAMAoNWJkAAAPRgDUJADAWDViNAADD0YB1CAAwIg1YgQAAg9KApQkAMC4NWJQAAEPTgOUIADA6DViIAAAT0IAlCAAwBw3YOQEApqEBuyUAwEw0YIcEAJiMBuyKAADz0YCdEABgShpwcQIAzEoDLkgAgIlpwEUIADA3DTg3AQCmpwHnIwBABRpwDgIAFKEBZyUAQB0acCYCAJSiAdsTAKAaDdiSAAAFacA2BACoSQPuSQCAsjTgdAIAVKYBpxAAoDgNOIkAAPVpwLEEAIigAXcTACCFBtxBAIAgGnCYAABZNOBDAgDE0YBbBABIpAFNAIBYGiAAQK7wBggAEC25AQIApIttgAAAhDZAAABai2yAAADcltYAAQD4SFQDBADgiJwGCADAnUIaIAAAx0hogAAAHK98AwQA4ES1GyAAAKcp3AABALiHqg0QAIB7K9kAAQDYSr0GCADAtoo1QAAAzqBSAwQA4GzKNEAAAM6sRgMEAOA8CjRAAADOafYGCADA%2BU3dAAEAuJB5GyAAABc1aQMEAGAHZmyAAADsxnQNEACAnZmrAQIAsEsTNUAAAHZslgYIAMDuTdEAAQBYxPgNEACApQzeAAEAWNDIDRAAgGUN2wABAFjcmA0QAIA1DNgAAQBYyWgNEACA9QzVAAEAWNU4DRAAgLUN0gABAOhghAYIAEAf3RsgAADd9G2AAAD01LEBAgDQWa8GCABAf10aIAAAQ1i/AQIAMIqVGyAAAANZswECADCW1RogAADDWacBAgAwohUaIAAAg1q6AQIAMK5FGyAAAENbrgECADC6hRogAAATWKIBAgAwh503QAAAprHbBggAwEx22AABAJjMrhogAADz2UkDBABgShdvgAAAzOqCDRAAgIldpAECADC3czdAAACmd74GCABABedogAAAFHHWBggAQB1naoAAAJSyfQMEAKCaLRsgAAAFbdMAAQCo6Z4NEACAsk5vgAAAVHZKAwQAoLiTGiAAAPUd2wABAAglAAChBAAglAAAhBIAgFACABBKAABCCQBAKAEACCUAAKEEACCUAACEEgCAUAIAEEoAAEIJAEAoAQAIJQAAoQQAIJQAAIQSAIBQAgAQaq/3Adz24x/98Fvf/EbvK8r6wpceun79%2Bkm/%2Buh3vv2DJ76/5j1s41Of%2BfzNmzd7X1GZTwAAoQQAIJQAAIQSAIBQAgAQyk8BEeHRtvffo9/tv24fvNfrGrbz3bZ30C4dfuVX7YODXtdU5BMAQCgBAAglAAChBAAglAAAhBIAgFACABBKAABCCQBAKAEACCUAAKEEACCUAACEEgCAUAIAEEoAAEIJAEAoAQAI5Z%2BEDPLWy6%2B8%2BeJLva/o4%2Bb775/yq6%2B%2B%2Btff/PZ3h1/5ZGtXj/5jhF1cue%2B%2B%2Bx/%2B8qJf4r1/3fjLH64t%2BiXObbPZ9D6hOAEI8trT%2B/tPPtX7ihE98%2Bxzzzz73OFXPtcuPzzA5%2BNPf%2B2rSwfg3/948/ffe2LRL8Gw%2Bn%2BLA9CFAACEEgCAUAIAEMpfAkd7t23eaaE/aHHz1F%2B93javtIOVTjnZJ3r87rzf2t8GePZjhX6zLkYAor3eNs%2BP%2Bp96X2%2B0zRsDrM3He/zu/Kdt9n1XZPBHQAChBAAglAAAhBIAgFACABBKAABCCQBAKAEACCUAAKEEACCUAACEEgCAUAIAEEoAAEIJAEAoAQAIJQAAoQQAIJQAAIQSAIBQAgAQSgAAQgkAQCgBAAglAAChBAAglAAAhBIAgFACABBKAABCCQBAKAEACCUAAKEEACCUAACEEgCAUAIAEEoAAEIJAEAoAQAIJQAAofZ6H8B6Hnr8sYcef6z3Fat68ic//dnPf9H7ChiUTwAAoQQAIJQAAIQSAIBQAgAQyk8BUdkX2%2BXHjn6T/7Ed/Kkd9LoHhuITAEAoAQAIJQAAoQQAIJQAAIQSAIBQAgAQSgAAQgkAQCgBAAglAAChBAAglAAAhBIAgFACABBKAABCCQBAKAEACOWfhAzy1suvvPniS72vWNVbL73c%2BwQYlwAEee3p/f0nn%2Bp9BTAKfwQEEEoAAEIJAEAoAQAI5S%2BBo73bNu%2B0Te8rVvXPsOeFUwhAtNfb5vl20PsKoA9/BAQQSgAAQgkAQCgBAAglAAChBAAglAAAhBIAgFACABBKAABCCQBAKAEACCUAAKEEACCUAACEEgCAUAIAEEoAAEIJAEAoAQAIJQAAoQQAIJQAAIQSAIBQAgAQSgAAQgkAQCgBAAglAAChBAAglAAAhBIAgFACABBKAABCCQBAKAEACCUAAKEEACCUAACEEgCAUAIAEEoAAEIJAEAoAQAIJQAAoQQAIJQAAIQSAIBQAgAQSgAAQgkAQKhLLzzw4B0vPXLj7S6ncIevtMufXbjQf24Hz7eDRb8Eu3V/u/T19rFFv8S7bfO7dnPRL0EX165cveMVnwAAQgkAQCgBAAglAAChBAAg1F7vAzjRfjvY9yM6HPX3tvll%2B6D3FRThEwBAKAEACCUAAKEEACCUAACEEgCAUAIAEEoAAEIJAEAoAQAIJQAAoQQAIJQAAIQSAIBQAgAQSgAAQgkAQCgBAAglAAChBAAglAAAhBIAgFACABBKAABCCQBAKAEACCUAAKEEACCUAACEEgCAUAIAEEoAAEIJAEAoAQAIJQAAoQQAIJQAAIQSAIBQAgAQSgAAQgkAQCgBAAglAAChBAAglAAcce3K1d4nAKxEAD5ya/01AAghALcd3n0NABIIQGvHLb4GAOUJwIlbrwFAbekBOH3lNQAoLDoA2%2By7BgBV5QZg%2B2XXAKCk0ACcddM1AKgnMQDnW3MNAIqJC8BFdlwDgEqyAnDxBdcAoIygAOxquzUAqCElALtdbQ0ACogIwBJ7rQHA7OoHYLml1gBgasUDsPRGawAwr8oBWGedNQCYVNkArLnLGgDMqGYA1l9kDQCmUzAAvbZYA4C5VAtA3xXWAGAipQIwwv6OcAPANuoEYJzlHecSgFMUCcBomzvaPQB3qxCAMdd2zKsAPjR9AEbe2ZFvA5g7AOMv7PgXArEmDsAs2zrLnUCaWQMw16rOdS0QYsoAzLinM94M1DZfAOZd0nkvB0qaLACzb%2Bjs9wOVzBSAGutZ4ymAAqYJQKXdrPQswLzmCEC9xaz3RMB0JghA1a2s%2BlzALEYPQO2VrP10wOCGDkDCPiY8IzCmcQOQs4w5TwoMZdAApG1i2vMCIxgxAJlrmPnUQEfDBSB5B5OfHVjfWAGwgN4BYDUDBcD23eJ9ANYxSgCs3mHeDWAFQwTA3t3NewIsbYgAPHLj7d4nDMd7AixtiAA0e3eUdwNYwSgBaFbv/7wPwDoGCkCzfd4BYEVjBaBlL2DyswPrGy4ALXUHM58a6GjEALS8NUx7XmAEgwagJW1izpMCQxk3AC1jGROeERjT0AFo1fex9tMBgxs9AK3uSlZ9LmAWEwSgVdzKek8ETGeOALRai1npWYB5TROAVmU3azwFUMBMAWjzr%2Bfs9wOVTBaANvOGzns5UNJ8AWhzLumMNwO1TRmANtueznUtEGLWALR5VnWWO4E0EwegzbCt418IxJo7AG3shR35NoDpA9BG3dkxrwL4UIUAtPHWdrR7AO5WJABtpM0d5xKAU9QJQBtjeUe4AWAbpQLQeu%2Bv9QcmUi0Ard8KW39gLgUD0HpssfUHplMzAG3dRbb%2BwIzKBqCttcvWH5hU5QC05dfZ%2BgPzKh6AtuRGW39gavUD0JZZausPzC4iAG3Xe239gQJSAtB2t9rWH6ghKABtF9tt/YEysgLQLrbg1h%2BoJC4A7bw7bv2BYhID0M6%2B5tYfqCc0AO0sm279gZJyA9C2W3brD1QVHYB2r323/kBh6QFoJ6%2B89QdqE4DWjtt66w%2BUJwC3HV586w8kEICP3Np96w%2BEEIAjrD%2BQQwAAQgkAQCgBAAglAAChBAAglAAAhBIAgFACABBKAABCCQBAKAEACCUAAKEEACCUAACEEgCAUAIAEEoAAEIJAEAoAQAIJQAAoQQAIJQAAIQSAIBQAgAQSgAAQgkAQCgBAAglAAChBAAglAAAhBIAgFACABBKAABCCQBAKAEACCUAAKH27n7p2pWr698BwMp8AgAIJQAAoQQAIJQAAIQSAIBQ/wMvsckPSk0iowAAAABJRU5ErkJggg%3D%3D%22%2C%20%22sizes%22%3A%20%22512x512%22%2C%20%22type%22%3A%20%22image/png%22%2C%20%22purpose%22%3A%20%22any%20maskable%22%7D%5D%7D">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap');
+
+  :root{
+    --ink:#141414; --panel:#1e1e1e; --panel2:#262626; --red:#d1232a;
+    --red-dim:#7a1418; --bone:#f2f0eb; --grey:#8f8f8f; --line:#333;
+    --good:#3fae5a; --warn:#d99a1f;
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+  html,body{background:var(--ink); color:var(--bone); font-family:'Barlow',sans-serif;}
+  #app{max-width:460px; margin:0 auto; padding:calc(18px + env(safe-area-inset-top)) 16px calc(60px + env(safe-area-inset-bottom));}
+
+  .top{display:flex; align-items:flex-end; justify-content:space-between; border-bottom:2px solid var(--red); padding-bottom:10px;}
+  .top h1{font-family:'Anton',sans-serif; font-size:30px; line-height:.92; letter-spacing:.5px; text-transform:uppercase;}
+  .top h1 span{color:var(--red);}
+  .streak{text-align:right; font-family:'Barlow Condensed'; font-weight:700;}
+  .streak b{font-family:'Anton'; font-size:26px; display:block; line-height:1; color:var(--bone);}
+  .streak small{font-size:10px; letter-spacing:1px; color:var(--grey); text-transform:uppercase;}
+
+  .date{font-family:'Barlow Condensed'; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--grey); font-size:12px; margin:14px 0 6px;}
+
+  /* Dashboard */
+  .stats{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:6px;}
+  .stat{background:var(--panel); border:1px solid var(--line); border-radius:4px; padding:12px 12px 10px;}
+  .stat .lab{font-family:'Barlow Condensed'; font-weight:600; font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--grey);}
+  .stat .val{font-family:'Anton'; font-size:28px; line-height:1.05; margin-top:2px;}
+  .stat .val u{text-decoration:none; font-size:14px; color:var(--grey);}
+  .stat .sub{font-size:11px; color:var(--grey); margin-top:2px; font-weight:500;}
+  .delta.down{color:var(--good);} .delta.up{color:var(--red);} .delta.flat{color:var(--grey);}
+
+  /* Log form */
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:4px; padding:14px; margin-top:8px;}
+  .card h2{font-family:'Barlow Condensed'; font-weight:700; text-transform:uppercase; letter-spacing:1px; font-size:15px; margin-bottom:12px; display:flex; align-items:center; gap:8px;}
+  .card h2:before{content:""; width:10px; height:10px; background:var(--red); display:inline-block; transform:rotate(45deg);}
+  .field{margin-bottom:14px;}
+  .field > label{display:block; font-family:'Barlow Condensed'; font-weight:600; font-size:12px; letter-spacing:1px; text-transform:uppercase; color:var(--grey); margin-bottom:6px;}
+  .wt{display:flex; align-items:center; gap:8px;}
+  .wt input{flex:1; background:var(--ink); border:1px solid var(--line); border-radius:4px; color:var(--bone); font-family:'Anton'; font-size:24px; padding:8px 12px; width:100%;}
+  .wt span{font-family:'Barlow Condensed'; font-weight:700; color:var(--grey);}
+  .seg{display:flex; gap:6px;}
+  .seg button{flex:1; background:var(--ink); border:1px solid var(--line); color:var(--bone); font-family:'Barlow Condensed'; font-weight:600; text-transform:uppercase; letter-spacing:.5px; font-size:13px; padding:10px 4px; border-radius:4px; cursor:pointer; transition:.12s;}
+  .seg button.on{background:var(--red); border-color:var(--red); color:#fff;}
+  .seg button.on.g{background:var(--good); border-color:var(--good);}
+  .seg button.on.w{background:var(--warn); border-color:var(--warn); color:#111;}
+  textarea{width:100%; background:var(--ink); border:1px solid var(--line); border-radius:4px; color:var(--bone); font-family:'Barlow'; font-size:14px; padding:8px 10px; resize:vertical; min-height:44px;}
+  .save{width:100%; background:var(--red); color:#fff; border:none; font-family:'Anton'; text-transform:uppercase; letter-spacing:1px; font-size:17px; padding:14px; border-radius:4px; cursor:pointer; margin-top:2px;}
+  .save:active{transform:translateY(1px);} .save.done{background:var(--good);}
+
+  /* Coach */
+  .coach{background:linear-gradient(180deg,var(--panel2),var(--panel)); border:1px solid var(--red-dim);}
+  .coachbtn{width:100%; background:var(--ink); color:var(--bone); border:1px solid var(--red); font-family:'Anton'; text-transform:uppercase; letter-spacing:1px; font-size:16px; padding:13px; border-radius:4px; cursor:pointer;}
+  .coachbtn:disabled{opacity:.5;}
+  .coachout{margin-top:12px; font-size:14.5px; line-height:1.5; white-space:pre-wrap; display:none;}
+  .coachout.show{display:block;}
+  .corner{font-family:'Barlow Condensed'; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--red); font-size:12px; margin-bottom:4px;}
+
+  /* history */
+  .hist{margin-top:8px;}
+  .row{display:flex; align-items:center; gap:10px; padding:9px 2px; border-bottom:1px solid var(--line); font-size:13px;}
+  .row .d{font-family:'Barlow Condensed'; font-weight:700; width:52px; color:var(--grey);}
+  .row .kg{font-family:'Anton'; font-size:16px; width:64px;}
+  .chip{font-family:'Barlow Condensed'; font-weight:600; font-size:10px; letter-spacing:.5px; text-transform:uppercase; padding:2px 6px; border-radius:3px; border:1px solid var(--line); color:var(--grey);}
+  .chip.p{color:var(--good); border-color:var(--good);}
+  .chip.t{color:#fff; background:var(--red-dim); border-color:var(--red);}
+  .chip.b{color:var(--warn); border-color:var(--warn);}
+  .empty{color:var(--grey); font-size:13px; padding:10px 2px;}
+  .foot{text-align:center; color:var(--grey); font-size:10.5px; margin-top:24px; letter-spacing:.5px;}
+
+  /* tabs */
+  .tabs{display:flex; gap:6px; margin:14px 0 4px;}
+  .tabs button{flex:1; background:var(--panel); border:1px solid var(--line); color:var(--grey); font-family:'Barlow Condensed'; font-weight:700; text-transform:uppercase; letter-spacing:1px; font-size:14px; padding:11px; border-radius:4px; cursor:pointer;}
+  .tabs button.on{background:var(--red); border-color:var(--red); color:#fff;}
+  #view-training{display:none;}
+
+  /* training */
+  .block-title{font-family:'Anton'; text-transform:uppercase; font-size:19px; letter-spacing:.5px; margin:16px 0 3px;}
+  .block-title span{color:var(--red);}
+  .block-sub{font-size:12px; color:var(--grey); margin-bottom:8px; font-weight:500;}
+  .ex{background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--red); border-radius:4px; padding:11px 12px; margin-bottom:7px;}
+  .ex .exhead{display:flex; justify-content:space-between; align-items:baseline; gap:8px;}
+  .ex .name{font-family:'Barlow Condensed'; font-weight:700; font-size:15.5px; letter-spacing:.3px;}
+  .ex .sets{font-family:'Anton'; font-size:14px; color:var(--red); white-space:nowrap;}
+  .ex .cue{font-size:12.5px; color:var(--grey); line-height:1.4; margin-top:3px;}
+  .ex .vid{display:inline-flex; align-items:center; gap:5px; margin-top:8px; background:var(--ink); border:1px solid var(--line); color:var(--bone); text-decoration:none; font-family:'Barlow Condensed'; font-weight:600; text-transform:uppercase; letter-spacing:.5px; font-size:12px; padding:6px 11px; border-radius:4px;}
+  .ex .vid:active{background:var(--red); border-color:var(--red);}
+  .note-box{background:var(--panel2); border:1px solid var(--line); border-radius:4px; padding:12px 13px; font-size:13px; line-height:1.5; margin-top:10px; color:var(--bone);}
+  .note-box b{color:var(--red);}
+
+  /* essen */
+  #view-essen{display:none;}
+  .daypills{display:flex; gap:5px; margin:14px 0 10px; overflow-x:auto; -webkit-overflow-scrolling:touch;}
+  .daypills button{flex:0 0 auto; background:var(--panel); border:1px solid var(--line); color:var(--grey); font-family:'Barlow Condensed'; font-weight:700; text-transform:uppercase; font-size:12px; letter-spacing:.5px; padding:8px 12px; border-radius:20px; cursor:pointer;}
+  .daypills button.on{background:var(--red); border-color:var(--red); color:#fff;}
+  .dayhdr{display:flex; align-items:baseline; justify-content:space-between; margin:4px 0 10px;}
+  .dayhdr .dname{font-family:'Anton'; font-size:24px; text-transform:uppercase;}
+  .dayhdr .dtype{font-family:'Barlow Condensed'; font-weight:700; text-transform:uppercase; letter-spacing:1px; font-size:12px; padding:4px 10px; border-radius:4px;}
+  .dtype.train{background:var(--red); color:#fff;}
+  .dtype.rest{background:var(--panel2); color:var(--grey); border:1px solid var(--line);}
+  .meal{background:var(--panel); border:1px solid var(--line); border-radius:4px; padding:11px 13px; margin-bottom:7px; display:flex; gap:11px;}
+  .meal .when{font-family:'Barlow Condensed'; font-weight:700; text-transform:uppercase; letter-spacing:.5px; font-size:11px; color:var(--red); width:66px; flex:0 0 66px; padding-top:2px;}
+  .meal .what{font-size:14px; line-height:1.45;}
+  .meal .what b{font-weight:600;}
+  .cookday{background:var(--red-dim); border:1px solid var(--red); border-radius:4px; padding:10px 13px; font-size:13px; line-height:1.45; margin-bottom:8px;}
+  .cookday b{color:#fff;}
+  .supp-mini{background:var(--panel2); border:1px solid var(--line); border-radius:4px; padding:10px 13px; font-size:12.5px; line-height:1.5; color:var(--grey); margin-top:8px;}
+  .supp-mini b{color:var(--bone);}
+
+  /* einkauf */
+  #view-einkauf{display:none;}
+  .shopcat{font-family:'Barlow Condensed'; font-weight:700; text-transform:uppercase; letter-spacing:1px; font-size:13px; color:#fff; background:var(--red); padding:7px 12px; border-radius:4px 4px 0 0; margin-top:12px;}
+  .shoplist{background:var(--panel); border:1px solid var(--line); border-top:none; border-radius:0 0 4px 4px; overflow:hidden;}
+  .shopitem{display:flex; align-items:center; gap:10px; padding:9px 12px; border-bottom:1px solid var(--line); cursor:pointer;}
+  .shopitem:last-child{border-bottom:none;}
+  .shopitem .box{width:18px; height:18px; flex:0 0 18px; border:2px solid var(--grey); border-radius:3px; display:flex; align-items:center; justify-content:center; font-size:12px; color:transparent;}
+  .shopitem.done .box{background:var(--good); border-color:var(--good); color:#fff;}
+  .shopitem .nm{flex:1; font-size:13.5px;}
+  .shopitem.done .nm{color:var(--grey); text-decoration:line-through;}
+  .shopitem .qt{font-family:'Barlow Condensed'; font-weight:600; font-size:12px; color:var(--grey); white-space:nowrap;}
+  .shopitem .pr{font-family:'Anton'; font-size:13px; color:var(--bone); width:44px; text-align:right;}
+  .shopitem.done .pr{color:var(--grey);}
+  .shoptotal{background:var(--panel2); border:1px solid var(--line); border-radius:4px; padding:12px 13px; margin-top:12px; font-size:13.5px; line-height:1.5;}
+  .shoptotal b{color:var(--red);}
+  .shopbtns{display:flex; gap:6px; margin-top:10px;}
+  .shopbtns button{flex:1; background:var(--ink); border:1px solid var(--line); color:var(--grey); font-family:'Barlow Condensed'; font-weight:600; text-transform:uppercase; letter-spacing:.5px; font-size:12px; padding:9px; border-radius:4px; cursor:pointer;}
+</style>
+
+<div id="app">
+  <div class="top">
+    <h1>Fight<br><span>Tracker</span></h1>
+    <div class="streak"><b id="streak">0</b><small>Tage Serie</small></div>
+  </div>
+
+  <div class="tabs">
+    <button id="tab-tracker" class="on" onclick="switchView('tracker')">Tracker</button>
+    <button id="tab-training" onclick="switchView('training')">Training</button>
+    <button id="tab-essen" onclick="switchView('essen')">Essen</button>
+    <button id="tab-einkauf" onclick="switchView('einkauf')">Einkauf</button>
+  </div>
+
+  <div id="view-tracker">
+  <div class="date" id="today"></div>
+
+  <!-- Dashboard -->
+  <div class="stats">
+    <div class="stat">
+      <div class="lab">Schnitt / Woche</div>
+      <div class="val" id="avg">–<u> kg</u></div>
+      <div class="sub delta flat" id="delta">warte auf Daten</div>
+    </div>
+    <div class="stat">
+      <div class="lab">Protein-Quote</div>
+      <div class="val" id="protq">0<u>/7</u></div>
+      <div class="sub" id="protsub">Tage getroffen</div>
+    </div>
+    <div class="stat">
+      <div class="lab">Training</div>
+      <div class="val" id="trn">0<u>/wk</u></div>
+      <div class="sub">Sessions diese Woche</div>
+    </div>
+    <div class="stat">
+      <div class="lab">Blähbauch</div>
+      <div class="val" id="bloat">0<u>/7</u></div>
+      <div class="sub">Tage diese Woche</div>
+    </div>
+  </div>
+
+  <!-- Coach -->
+  <div class="card coach">
+    <h2>Dein Corner</h2>
+    <button class="coachbtn" id="coachbtn">Tipp holen</button>
+    <div class="coachout" id="coachout"></div>
+  </div>
+
+  <!-- Log -->
+  <div class="card">
+    <h2>Heute eintragen</h2>
+    <div class="field">
+      <label>Gewicht (morgens, nüchtern)</label>
+      <div class="wt"><input id="wt" type="number" inputmode="decimal" step="0.1" placeholder="83.0"><span>kg</span></div>
+    </div>
+    <div class="field">
+      <label>Protein getroffen (~165 g)</label>
+      <div class="seg" data-seg="prot">
+        <button data-v="ja" class="g">Ja</button>
+        <button data-v="fast" class="w">Fast</button>
+        <button data-v="nein">Nein</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Training heute</label>
+      <div class="seg" data-seg="train">
+        <button data-v="muay">Muay Thai</button>
+        <button data-v="kraft">Kraft</button>
+        <button data-v="ruhe">Ruhe</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Wasser</label>
+      <div class="seg" data-seg="water">
+        <button data-v="low">unter 2 L</button>
+        <button data-v="ok" class="g">2–3 L</button>
+        <button data-v="high" class="g">über 3 L</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Bauch aufgebläht?</label>
+      <div class="seg" data-seg="bloat">
+        <button data-v="nein" class="g">Nein</button>
+        <button data-v="ja" class="w">Ja</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Notiz (optional)</label>
+      <textarea id="note" placeholder="Wie war der Tag, Schlaf, Energie..."></textarea>
+    </div>
+    <button class="save" id="save">Tag speichern</button>
+  </div>
+
+  <div class="date">Verlauf</div>
+  <div class="hist" id="hist"><div class="empty">Noch keine Einträge. Trag heute deinen ersten Tag ein.</div></div>
+
+  </div><!-- /view-tracker -->
+
+  <div id="view-training"></div>
+
+  <div id="view-essen"></div>
+
+  <div id="view-einkauf"></div>
+
+  <div class="foot">Gewicht zählt im Wochenschnitt, nicht am Einzeltag. · Ziel ~0,5 kg/Woche</div>
+</div>
+
+<script>
+const KEY = d => "ft:"+d;
+const state = {prot:null, train:null, water:null, bloat:null};
+
+function iso(d){ return d.toISOString().slice(0,10); }
+function todayISO(){ return iso(new Date()); }
+function fmtDE(d){ return new Date(d).toLocaleDateString('de-AT',{weekday:'long',day:'2-digit',month:'long'}); }
+function shortDE(d){ return new Date(d).toLocaleDateString('de-AT',{weekday:'short',day:'2-digit',month:'2-digit'}); }
+
+document.getElementById('today').textContent = fmtDE(new Date());
+
+// segment buttons
+document.querySelectorAll('.seg').forEach(seg=>{
+  const k = seg.dataset.seg;
+  seg.querySelectorAll('button').forEach(b=>{
+    b.onclick=()=>{
+      seg.querySelectorAll('button').forEach(x=>x.classList.remove('on'));
+      b.classList.add('on');
+      state[k]=b.dataset.v;
+    };
+  });
+});
+
+async function loadDay(d){
+  try{ const r = await window.storage.get(KEY(d)); return r? JSON.parse(r.value):null; }
+  catch(e){ return null; }
+}
+
+async function allEntries(){
+  let list=[];
+  try{
+    const r = await window.storage.list("ft:");
+    const keys = (r&&r.keys)?r.keys:[];
+    for(const k of keys){
+      try{ const g = await window.storage.get(k); if(g) list.push(JSON.parse(g.value)); }catch(e){}
+    }
+  }catch(e){}
+  list.sort((a,b)=> a.date<b.date?1:-1);
+  return list;
+}
+
+// prefill today if exists
+(async()=>{
+  const t = await loadDay(todayISO());
+  if(t){
+    if(t.weight) document.getElementById('wt').value=t.weight;
+    if(t.note) document.getElementById('note').value=t.note;
+    for(const k of ['prot','train','water','bloat']){
+      if(t[k]){ state[k]=t[k];
+        const seg=document.querySelector('.seg[data-seg="'+k+'"]');
+        const b=seg&&seg.querySelector('button[data-v="'+t[k]+'"]'); if(b)b.classList.add('on'); }
+    }
+  }
+  refresh();
+})();
+
+document.getElementById('save').onclick = async ()=>{
+  const w = parseFloat(document.getElementById('wt').value);
+  const entry = {
+    date: todayISO(),
+    weight: isNaN(w)?null:w,
+    prot: state.prot, train: state.train, water: state.water, bloat: state.bloat,
+    note: document.getElementById('note').value.trim()
+  };
+  try{
+    await window.storage.set(KEY(entry.date), JSON.stringify(entry), false);
+    const btn=document.getElementById('save');
+    btn.textContent="Gespeichert ✓"; btn.classList.add('done');
+    setTimeout(()=>{ btn.textContent="Tag speichern"; btn.classList.remove('done'); },1400);
+    refresh();
+  }catch(e){
+    const btn=document.getElementById('save'); btn.textContent="Fehler – nochmal tippen";
+    setTimeout(()=>btn.textContent="Tag speichern",1600);
+  }
+};
+
+function weekWindow(offset){ // offset 0 = last 7 days incl today, 1 = the 7 before
+  const end=new Date(); end.setHours(0,0,0,0); end.setDate(end.getDate()-offset*7);
+  const start=new Date(end); start.setDate(start.getDate()-6);
+  return {start:iso(start), end:iso(end)};
+}
+function inRange(d,w){ return d>=w.start && d<=w.end; }
+
+async function refresh(){
+  const list = await allEntries();
+
+  // streak: consecutive days back from today with any entry
+  let streak=0; let cur=new Date(); cur.setHours(0,0,0,0);
+  const dates=new Set(list.map(e=>e.date));
+  while(dates.has(iso(cur))){ streak++; cur.setDate(cur.getDate()-1); }
+  document.getElementById('streak').textContent=streak;
+
+  const w0=weekWindow(0), w1=weekWindow(1);
+  const cur7=list.filter(e=>inRange(e.date,w0));
+  const prev7=list.filter(e=>inRange(e.date,w1));
+
+  const avgOf=arr=>{ const v=arr.filter(e=>e.weight).map(e=>e.weight); return v.length? v.reduce((a,b)=>a+b,0)/v.length : null; };
+  const a0=avgOf(cur7), a1=avgOf(prev7);
+  const avgEl=document.getElementById('avg'), delEl=document.getElementById('delta');
+  if(a0){
+    avgEl.innerHTML = a0.toFixed(1)+'<u> kg</u>';
+    if(a1){
+      const d=a0-a1; const s=d.toFixed(1);
+      if(d<-0.05){ delEl.className='sub delta down'; delEl.textContent='▼ '+Math.abs(d).toFixed(1)+' kg vs. Vorwoche'; }
+      else if(d>0.05){ delEl.className='sub delta up'; delEl.textContent='▲ '+s+' kg vs. Vorwoche'; }
+      else { delEl.className='sub delta flat'; delEl.textContent='± stabil vs. Vorwoche'; }
+    } else { delEl.className='sub delta flat'; delEl.textContent='Basiswoche – Referenz'; }
+  } else { avgEl.innerHTML='–<u> kg</u>'; delEl.textContent='warte auf Daten'; }
+
+  const protHit=cur7.filter(e=>e.prot==='ja').length;
+  document.getElementById('protq').innerHTML=protHit+'<u>/7</u>';
+  const trn=cur7.filter(e=>e.train==='muay'||e.train==='kraft').length;
+  document.getElementById('trn').innerHTML=trn+'<u>/wk</u>';
+  const bl=cur7.filter(e=>e.bloat==='ja').length;
+  document.getElementById('bloat').innerHTML=bl+'<u>/7</u>';
+
+  // history
+  const h=document.getElementById('hist');
+  if(!list.length){ h.innerHTML='<div class="empty">Noch keine Einträge. Trag heute deinen ersten Tag ein.</div>'; return; }
+  h.innerHTML = list.slice(0,14).map(e=>{
+    let chips='';
+    if(e.prot==='ja') chips+='<span class="chip p">Protein ✓</span>';
+    if(e.train==='muay') chips+='<span class="chip t">Muay Thai</span>';
+    else if(e.train==='kraft') chips+='<span class="chip t">Kraft</span>';
+    if(e.bloat==='ja') chips+='<span class="chip b">Bauch</span>';
+    return '<div class="row"><span class="d">'+shortDE(e.date)+'</span><span class="kg">'+(e.weight?e.weight.toFixed(1):'–')+'</span>'+chips+'</div>';
+  }).join('');
+}
+
+// ---- Corner coach (offline, datengesteuert, >100 Tipps) ----
+const TIPS = {
+  weightGood:[
+    "Sauber. Dein Schnitt geht im richtigen Tempo runter – genau da wollen wir sein. Nicht schneller machen.",
+    "Das Gewicht faellt kontrolliert, so bleiben die Muskeln dran. Weiter so, nichts aendern.",
+    "Perfektes Tempo. Der Koerper gibt Fett ab und behaelt die Power. Kurs halten.",
+    "Genau der Bereich, den wir wollen. Diszipliniert bleiben, das zahlt sich im Ring aus.",
+  ],
+  weightFast:[
+    "Es faellt zu schnell. Iss eine Handvoll mehr Reis oder Kartoffeln – sonst holt sich der Koerper die Energie aus dem Muskel.",
+    "Zu schnell runter ist kein Gewinn. Pack an Trainingstagen etwas mehr Kohlenhydrate drauf, wir schuetzen die Muskeln.",
+    "Bremsen. Mehr als 0,7 kg die Woche und du verlierst Kraft. Iss etwas mehr, bleib stark.",
+    "Das geht zu flott. Erhoeh die Portionen leicht – wir wollen Fett verlieren, nicht Leistung.",
+  ],
+  weightStall:[
+    "Zwei Wochen flach. Zieh die Kohlenhydrate an den Ruhetagen etwas runter oder streich die Snacks, dann geht's weiter.",
+    "Der Schnitt steht. Kein Drama – schau ehrlich auf die Portionen am Wochenende, da versteckt sich meist das Plus.",
+    "Plateau. Bevor du weniger isst: trinkst du genug und schlaefst du gut? Beides bremst die Waage.",
+    "Nichts bewegt sich seit zwei Wochen. Kleiner Schnitt bei den KH, eine Woche beobachten, dann neu bewerten.",
+  ],
+  weightUp:[
+    "Waage hoch? Erst mal ruhig. Salz, wenig Schlaf oder ein spaetes Essen machen Wasser – schau den Wochenschnitt, nicht den Tag.",
+    "Nicht auf den Einzeltag starren. Wenn der Schnitt steigt, war das Wochenende zu locker – zurueck auf den Plan.",
+    "Ein Ausschlag nach oben ist meist Wasser. Trink normal weiter, iss sauber, in drei Tagen siehst du klarer.",
+    "Kein Grund zur Panik. Ein Tag beweist nichts. Halt dich an den Plan, der Schnitt korrigiert das.",
+  ],
+  weightNoData:[
+    "Trag ein paar Tage das Gewicht ein, dann sag ich dir was Konkretes zum Trend.",
+    "Ohne Gewichtsdaten kann ich den Trend nicht lesen. Jeden Morgen nuechtern wiegen, dann reden wir.",
+    "Noch zu wenig auf der Waage. Gib mir eine Woche Daten, dann wird der Tipp scharf.",
+  ],
+  proteinLow:[
+    "Dein Protein sitzt zu selten. Das ist im Defizit das Wichtigste – ohne genug Eiweiss verlierst du Muskel statt Fett.",
+    "Zu wenig Protein-Tage. Bau in jede Mahlzeit eine Eiweissquelle: Eier, Huhn, Quark, Fisch.",
+    "Protein ist heilig, gerade jetzt. Ein Magerquark abends rettet dir schnell 25 g.",
+    "Du triffst dein Eiweiss zu selten. Halt griechischen Joghurt und Quark im Kuehlschrank als Notfall-Protein.",
+    "Zu wenig Protein diese Woche. Wenn's zeitlich eng ist: Thunfisch aus der Dose, 30 Sekunden, 25 g Eiweiss.",
+  ],
+  proteinGood:[
+    "Dein Protein sitzt – das ist der Grund, warum die Muskeln bleiben waehrend das Fett geht. Genau so.",
+    "Eiweiss stabil getroffen. Das ist die halbe Miete im Defizit, stark.",
+    "Protein-Quote sieht gut aus. Das schuetzt deine Kraft, weiter dranbleiben.",
+  ],
+  trainingLow:[
+    "Wenig Training diese Woche. Auch im Defizit brauchst du den Reiz, sonst denkt der Koerper, er darf Muskel abbauen.",
+    "Zu wenige Sessions. Selbst kurz aufs Bag hilft – Bewegung haelt den Stoffwechsel und den Kopf oben.",
+    "Trainingstage zu duenn. Ich weiss, Job und Baby ziehen – aber zwei feste Termine pro Woche sind Pflicht.",
+    "Wenig los diese Woche. Kein Muster daraus machen. Naechste Session fest in den Kalender.",
+  ],
+  trainingGood:[
+    "Gutes Trainingspensum. Dein Koerper kriegt den Reiz, die Muskeln haben einen Grund zu bleiben.",
+    "Solide Woche im Training. Achte auf die Regeneration, dann bringt jede Session was.",
+    "Training laeuft. Denk dran: Schlaf ist die Halfte des Trainings, gib dem Koerper die Pause.",
+  ],
+  bloatHigh:[
+    "Der Bauch blaeht oft auf. Meistens ist das kein Fett – langsamer essen und gruendlich kauen, das killt es am schnellsten.",
+    "Viel Blaehbauch diese Woche. Check Salz und Fertigzeug, und lass Suessstoff-Getraenke weg, die machen Luft.",
+    "Bauch haeufig hart? Mehr Wasser ueber den Tag verteilt, nicht alles auf einmal. Und beim Essen Zeit lassen.",
+    "Der aufgeblaehte Bauch kommt oft von zu schnellem Essen. Setz dich hin, kau richtig, kein Essen im Stehen zwischen Terminen.",
+    "Wenn der Bauch dauernd blaeht: beobachte mal die Milchprodukte ueber ein paar Tage. Manchmal ist Laktose der Ausloeser.",
+  ],
+  waterLow:[
+    "Du trinkst zu wenig. 2,5 bis 3 Liter – das hilft Verdauung, Leistung und gegen den Blaehbauch auf einmal.",
+    "Wasser ist zu niedrig. Stell dir eine Flasche auf den Schreibtisch, das erledigt sich dann von selbst.",
+    "Zu wenig getrunken. Wenig Wasser sieht auf der Waage oft aus wie Stillstand, dabei fehlt nur Fluessigkeit.",
+    "Trink mehr. Gerade bei viel Muay Thai verlierst du ordentlich Schweiss, das muss wieder rein.",
+  ],
+  streakGood:[
+    "Starke Serie beim Eintragen. Genau diese Konstanz ist es, die am Ende den Unterschied macht.",
+    "Du trackst jeden Tag – das ist Disziplin, die sich auf den Ring uebertraegt. Respekt.",
+  ],
+};
+const GENERAL = [
+  "Fettverlust passiert in der Kueche, Explosivitaet im Gym. Beides zaehlt, keins allein reicht.",
+  "Ein schlechter Tag macht nichts kaputt. Zwei Wochen schlechte Tage schon. Bleib dran.",
+  "Schlaf ist dein staerkstes Supplement. Sieben, acht Stunden schlagen jedes Pulver.",
+  "Kreatin nicht vergessen – 5 g taeglich, egal ob Trainingstag oder nicht. Das ist deine Krafthilfe.",
+  "Beweglichkeit kommt nicht von allein. Zehn Minuten Hueft-Mobility nach dem Training, jedes Mal.",
+  "Am Wochenende entscheidet sich die Woche. Zwei lockere Tage koennen fuenf disziplinierte auffressen.",
+  "Alkohol bremst Fettverlust und Regeneration doppelt. Wenn ueberhaupt, dann selten und wenig.",
+  "Iss langsam. Der Koerper braucht 20 Minuten bis er Satt meldet – wer schlingt, isst zu viel.",
+  "Vitamin D3 im Winter nicht vergessen. In Oesterreich ist fast jeder zu niedrig, das kostet Testosteron.",
+  "Magnesium am Abend hilft gegen Kraempfe und fuer tieferen Schlaf. Gerade bei viel Training Gold wert.",
+  "Denk an den Nacken. Zwei kurze Einheiten die Woche schuetzen dich bei Treffern und im Clinch.",
+  "Explosiv trainieren heisst nicht schwer bis zum Versagen. Sauber, schnell, 2-3 Reps im Tank lassen.",
+  "Deine Wirbelsaeule ist als Kaempfer zu wertvoll. Beim Heben lieber Technik als Ego, immer.",
+  "Griffkraft gewinnt Clinches. Ein paar Farmer's Walks am Ende der Krafteinheit, fertig.",
+  "Wasser vor dem Kaffee am Morgen. Der Koerper ist nach der Nacht ausgetrocknet.",
+  "Gemuese ist dein Fuellstoff. Grosser Teller, wenig Kalorien, viel satt – dein Freund im Defizit.",
+  "Protein zuerst essen, dann den Rest. Dann bist du satt bevor die Kohlenhydrate ueberhand nehmen.",
+  "Ein Kampf wird in den langweiligen Wochen gewonnen, nicht in der einen guten Session.",
+  "Nach dem Training ist das Fenster fuer Kohlenhydrate am groessten. Leg deine Beilagen dahin.",
+  "Muskelkater ist kein Massstab fuer ein gutes Training. Fortschritt ist der Massstab.",
+  "Wenn du muede bist, ist eine leichtere Session besser als keine. Aber Schlaf schlaegt beides.",
+  "Halt das Fruehstueck simpel. Eier und Haferflocken, jeden Tag, kein Kopfzerbrechen.",
+  "Konstanz schlaegt Perfektion. Lieber jeden Tag 90 Prozent als einmal 100 und dann drei Tage nichts.",
+  "Der Blaehbauch am Abend ist oft nur Verdauung. Morgens nuechtern siehst du die Wahrheit auf der Waage.",
+  "Kaffee vor dem Training ist dein legaler Booster. Nutz ihn, aber nicht nach 16 Uhr wegen dem Schlaf.",
+  "Zwei Liter kochen am Kochtag, dann hast du die Woche Ruhe. Vorbereitung schlaegt Willenskraft.",
+  "Steh nicht taeglich zehnmal auf der Waage. Einmal morgens nuechtern, der Rest ist Rauschen.",
+  "Deine Hueften treiben jeden Kick. Halt sie beweglich, dann wird der Kick schneller und hoeher.",
+  "Wer im Job viel sitzt, sollte oefter aufstehen. Bewegung ueber den Tag verbrennt mehr als eine Session.",
+  "Fisch zweimal die Woche fuer Omega-3. Gut gegen Entzuendung, gut fuer die Gelenke beim harten Training.",
+  "Kein Essen aus Langeweile oder Stress. Frag dich: echter Hunger oder nur Kopf? Meist ist es der Kopf.",
+  "Die letzten zwei Kilo sind die zaehesten. Da trennt sich Disziplin von guten Vorsaetzen.",
+  "Rotationskraft aus der Huefte macht den Schlag hart. Med-Ball-Wuerfe zahlen direkt auf die Faust ein.",
+  "Iss genug an Trainingstagen. Wer vor dem Training leer ist, trainiert schwach und lernt schlecht.",
+  "Regeneration ist kein Faulenzen. Am Ruhetag baut der Koerper das auf, was du im Training angerissen hast.",
+  "Halt die Notfall-Snacks gesund: Nuesse, Joghurt, Obst. Was nicht im Haus ist, isst du nicht.",
+  "Ein bisschen Hunger vor dem Essen ist normal im Defizit. Ausgehungert bis zum Fressen aber nicht – dann plan besser.",
+  "Technik im Training schlaegt Kraft. Aber Kraft macht gute Technik gefaehrlich. Beides bauen.",
+  "Trink ueber den Tag verteilt, nicht literweise auf einmal. Sonst faehrt dein Bauch Achterbahn.",
+  "Der beste Plan ist der, den du durchhaeltst. Simpel und wiederholbar gewinnt gegen kompliziert und perfekt.",
+  "Setz dir Wochenziele, nicht Tagesziele. Der Koerper arbeitet in Wochen, nicht in 24 Stunden.",
+  "Wenn die Motivation weg ist, traegt dich die Routine. Deshalb bauen wir Gewohnheiten, keine Willensakte.",
+  "Kau dein Essen zu Brei bevor du schluckst. Klingt banal, halbiert aber oft den Blaehbauch.",
+  "Nach hartem Sparring braucht der Koerper mehr Schlaf, nicht weniger. Gib ihm die Nacht.",
+  "Salz nicht verteufeln, aber Fertigzeug hat zu viel davon. Selbst kochen heisst Salz selbst steuern.",
+  "Ein Foto alle zwei Wochen sagt mehr als die Waage. Der Spiegel luegt nicht ueber Form.",
+  "Explosive Beine kommen von Sprungkraft und Kreuzheben. Beides einmal die Woche reicht fuer spuerbar mehr Wumms.",
+  "Iss dein Protein auch am Ruhetag. Der Muskel wird an Pausetagen repariert, nicht an Trainingstagen.",
+  "Der Kopf gibt vor dem Koerper auf. Wenn's im Training brennt, ist meist noch eine Runde drin.",
+  "Halt Kohlenhydrate rund ums Training. Da werden sie zu Power statt zu Speicher.",
+  "Weniger ist manchmal mehr: eine Uebung sauber schlaegt fuenf halbherzig.",
+  "Dein Wochenschnitt ist der Chef, nicht der Einzeltag. Triff Entscheidungen nur ueber die Woche.",
+  "Wer gut schlaeft, hat weniger Heisshunger. Schlechter Schlaf treibt dich zum Zucker.",
+  "Bau dir feste Essenszeiten. Ein Koerper mit Rhythmus verdaut besser und blaeht weniger.",
+  "Disziplin ist, das Richtige zu tun wenn keiner zuschaut und keiner dich lobt. Genau das baust du hier.",
+];
+
+let recentGen = [];
+(async()=>{ try{ const r=await window.storage.get("ft:recentgen"); if(r) recentGen=JSON.parse(r.value)||[]; }catch(e){} })();
+
+function pickGeneral(){
+  let idx, guard=0;
+  do{ idx=Math.floor(Math.random()*GENERAL.length); guard++; }
+  while(recentGen.includes(idx) && guard<40);
+  recentGen.push(idx); if(recentGen.length>12) recentGen.shift();
+  try{ window.storage.set("ft:recentgen", JSON.stringify(recentGen), false); }catch(e){}
+  return GENERAL[idx];
+}
+function rnd(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+document.getElementById('coachbtn').onclick = async ()=>{
+  const btn=document.getElementById('coachbtn'), out=document.getElementById('coachout');
+  const old=btn.textContent; out.className='coachout show';
+  const list=(await allEntries());
+  const parts=[];
+
+  if(list.length < 2){
+    parts.push("Trag ein paar Tage ein, dann lese ich dir den Trend raus.");
+    parts.push(pickGeneral());
+  } else {
+    const w0=weekWindow(0), w1=weekWindow(1);
+    const cur7=list.filter(e=>inRange(e.date,w0));
+    const prev7=list.filter(e=>inRange(e.date,w1));
+    const avgOf=arr=>{ const v=arr.filter(e=>e.weight).map(e=>e.weight); return v.length? v.reduce((a,b)=>a+b,0)/v.length:null; };
+    const a0=avgOf(cur7), a1=avgOf(prev7);
+
+    // 1) Gewichts-Trend
+    if(a0!==null && a1!==null){
+      const d=a0-a1;
+      if(d<-0.7) parts.push(rnd(TIPS.weightFast));
+      else if(d<-0.1) parts.push(rnd(TIPS.weightGood));
+      else if(d>0.15) parts.push(rnd(TIPS.weightUp));
+      else parts.push(rnd(TIPS.weightStall));
+    } else if(a0===null){
+      parts.push(rnd(TIPS.weightNoData));
+    }
+
+    // 2) dringendste Baustelle (eine)
+    const protHit=cur7.filter(e=>e.prot==='ja').length;
+    const trn=cur7.filter(e=>e.train==='muay'||e.train==='kraft').length;
+    const bloat=cur7.filter(e=>e.bloat==='ja').length;
+    const waterLow=cur7.filter(e=>e.water==='low').length;
+    const logged=cur7.length;
+
+    const issues=[];
+    if(logged>=3 && protHit/logged < 0.5) issues.push([3, rnd(TIPS.proteinLow)]);
+    if(logged>=4 && trn < 2) issues.push([2, rnd(TIPS.trainingLow)]);
+    if(bloat >= 3) issues.push([2, rnd(TIPS.bloatHigh)]);
+    if(waterLow >= 3) issues.push([1, rnd(TIPS.waterLow)]);
+    if(issues.length){
+      issues.sort((a,b)=>b[0]-a[0]);
+      parts.push(issues[0][1]);
+    } else {
+      // nichts brennt -> Lob fuer das was laeuft
+      if(logged>=3 && protHit/logged >= 0.7) parts.push(rnd(TIPS.proteinGood));
+      else if(trn>=3) parts.push(rnd(TIPS.trainingGood));
+    }
+
+    // 3) immer ein allgemeiner Tipp obendrauf
+    parts.push(pickGeneral());
+  }
+
+  out.innerHTML='<span class="corner">Corner</span>'+parts.join(' ');
+  btn.textContent=old;
+};
+// ---- Training view ----
+const WORKOUTS = [
+  { title:'Einheit A', accent:'Mittwoch · Kraft & Beinpower',
+    ex:[
+      {n:'Trap-Bar Kreuzheben', s:'4 × 4–5', c:'Basis für Hüftpower. Rücken gerade, Rumpf fest, explosiv nach oben. Alt.: Kettlebell-Swings.', q:'Trap Bar Kreuzheben Technik'},
+      {n:'Goblet / Front Squat', s:'4 × 5', c:'Tief, kontrolliert, Knie in Fußrichtung. Ego weg – sauber vor schwer.', q:'Goblet Squat Technik richtig'},
+      {n:'Schulterdrücken / Push Press', s:'3 × 5–6', c:'Aus den Beinen mitdrücken, Rumpf bleibt fest.', q:'Push Press Technik'},
+      {n:'Klimmzüge / Rudern', s:'3 × 6–8', c:'Schulterblätter zusammen, volle Bewegung.', q:'Klimmzug saubere Technik'},
+      {n:'Hanging Leg Raises + Pallof Press', s:'3 × 10 / 3 × 10 je Seite', c:'Rumpf & Anti-Rotation – überträgt Kraft in Kicks und Schläge.', q:'Pallof Press Technik'},
+    ]},
+  { title:'Einheit B', accent:'Samstag · Explosivität & Rotation',
+    ex:[
+      {n:'Box Jumps / Med-Ball Slams', s:'4 × 3–4', c:'Reine Schnellkraft = deine Geschwindigkeit im Ring. Maximal explosiv, voll erholen.', q:'Box Jump Technik'},
+      {n:'Bankdrücken / Dips', s:'4 × 5–6', c:'Kontrolliert runter, kräftig hoch. 2–3 Reps im Tank lassen.', q:'Bankdrücken saubere Technik'},
+      {n:'Rumänisches Kreuzheben / Hip Thrust', s:'3 × 6–8', c:'Hamstrings & Gesäß = Kickkraft. Hüfte führt die Bewegung.', q:'Rumänisches Kreuzheben Technik'},
+      {n:'Einarmiges Rudern', s:'3 × 8', c:'Sauber ziehen, kein Schwung aus dem Rücken.', q:'einarmiges Kurzhantel Rudern Technik'},
+      {n:'Med-Ball Rotationswürfe + Kabel-Holzhacker', s:'3 × 8 je Seite', c:'Kraftübertragung Hüfte → Faust. Das macht den Schlag hart.', q:'Medizinball Rotationswurf Training'},
+    ]},
+];
+const EXTRAS = [
+  {n:'Nacken (gegen Widerstand)', s:'2–3× / Woche kurz', c:'Schützt bei Treffern & im Clinch. Vorsichtig, langsam steigern.', q:'Nackentraining Kampfsport'},
+  {n:'Griffkraft – Farmer\'s Walks', s:'am Ende, 3 × 30–40 m', c:'Starker Griff = besserer Clinch.', q:'Farmers Walk Technik'},
+  {n:'Mobility: Hüfte / Sprunggelenk / BWS', s:'10 Min nach jeder Einheit', c:'Genau hier hängt deine Beweglichkeit. 90/90 Hüfte, Ankle Rocks, BWS-Rotation.', q:'Hüft Mobility Kampfsport Routine'},
+];
+
+function ytLink(q){ return 'https://www.youtube.com/results?search_query='+encodeURIComponent(q+' deutsch'); }
+
+function exCard(e){
+  return '<div class="ex"><div class="exhead"><span class="name">'+e.n+'</span><span class="sets">'+e.s+'</span></div>'
+       + '<div class="cue">'+e.c+'</div>'
+       + '<a class="vid" href="'+ytLink(e.q)+'" target="_blank" rel="noopener">▶ Technik-Video</a></div>';
+}
+
+function renderTraining(){
+  let html='';
+  WORKOUTS.forEach(w=>{
+    html += '<div class="block-title">'+w.title.replace(/(A|B)$/,'<span>$1</span>')+'</div>';
+    html += '<div class="block-sub">'+w.accent+'</div>';
+    html += w.ex.map(exCard).join('');
+  });
+  html += '<div class="block-title">Extras <span>·</span> oft vergessen</div>';
+  html += '<div class="block-sub">Die kleinen Dinge, die Kämpfer stärker & robuster machen</div>';
+  html += EXTRAS.map(exCard).join('');
+  html += '<div class="note-box"><b>Im Defizit gilt:</b> nicht bis zum Versagen, keine Muskelkater-Jagd. Immer 2–3 Wiederholungen im Tank lassen. Du trainierst für Power & Muskelerhalt – die Regeneration fürs Muay Thai hat Vorrang. Sonntag ist Ruhetag.</div>';
+  document.getElementById('view-training').innerHTML=html;
+}
+renderTraining();
+
+function switchView(v){
+  ['tracker','training','essen','einkauf'].forEach(name=>{
+    document.getElementById('view-'+name).style.display = (name===v)?'block':'none';
+    document.getElementById('tab-'+name).classList.toggle('on', name===v);
+  });
+  if(v==='essen') renderEssen(essenSel);
+  if(v==='einkauf') renderEinkauf();
+}
+
+// ---- Essen view (Wochenplan, zeigt automatisch heute) ----
+// index nach Wochentag: 0=So ... 6=Sa
+const WEEK = [
+  { type:'rest', meals:[  // Sonntag
+    {w:'Frühstück', t:'Machst du dir selbst – z. B. Eier oder Magerquark mit Beeren'},
+    {w:'Mittag (kalt)', t:'Magerquark (250 g) + Obst, oder Thunfisch-Salat – kein Kochen'},
+    {w:'Abend (frisch)', t:'Von zuhause gekocht: Fleisch/Fisch + Gemüse, wenig Reis/Brot'},
+  ]},
+  { type:'train', meals:[  // Montag
+    {w:'Frühstück', t:'Machst du dir selbst – z. B. Eier + Haferflocken + Beeren'},
+    {w:'Mittag (kalt)', t:'Magerquark (250 g) + Banane, oder Thunfisch-Salat – kein Kochen'},
+    {w:'Vor Training', t:'1 Banane + Kaffee'},
+    {w:'Abend (frisch)', t:'Von zuhause gekocht: 180 g Hühnchen + 200 g Reis + Gemüse'},
+  ]},
+  { type:'train', meals:[  // Dienstag
+    {w:'Frühstück', t:'Machst du dir selbst'},
+    {w:'Mittag (kalt)', t:'Griechischer Joghurt + Nüsse + Obst, oder Vollkornbrot mit Ei/Thunfisch'},
+    {w:'Vor Training', t:'1 Banane + Kaffee'},
+    {w:'Abend (frisch)', t:'Von zuhause gekocht: 180 g Pute/Rind + Kartoffeln + Gemüse'},
+  ]},
+  { type:'rest', note:'Kraft-Einheit A. Kohlenhydrate heute runter.', meals:[  // Mittwoch
+    {w:'Frühstück', t:'Machst du dir selbst'},
+    {w:'Mittag (kalt)', t:'Thunfisch mit Gemüse, oder Quark + Nüsse – kein Kochen'},
+    {w:'Abend (frisch)', t:'Von zuhause gekocht: Faschiertes mit Linsen + viel Gemüse, wenig Reis'},
+  ]},
+  { type:'train', meals:[  // Donnerstag
+    {w:'Frühstück', t:'Machst du dir selbst'},
+    {w:'Mittag (kalt)', t:'Magerquark (250 g) + Banane, oder Thunfisch-Salat'},
+    {w:'Vor Training', t:'1 Banane + Kaffee'},
+    {w:'Abend (frisch)', t:'Von zuhause gekocht: 180 g Lachs/Fisch + Reis + Gemüse'},
+  ]},
+  { type:'train', meals:[  // Freitag
+    {w:'Frühstück', t:'Machst du dir selbst'},
+    {w:'Mittag (kalt)', t:'Vollkornbrot mit Ei/Thunfisch, oder Joghurt + Nüsse'},
+    {w:'Vor Training', t:'1 Banane + Kaffee'},
+    {w:'Abend (frisch)', t:'Von zuhause gekocht: 180 g Hühnchen/Rind + Kartoffeln oder Reis + Gemüse'},
+  ]},
+  { type:'rest', note:'Kraft-Einheit B. Kohlenhydrate runter, mehr Gemüse & gute Fette.', meals:[  // Samstag
+    {w:'Frühstück', t:'Machst du dir selbst'},
+    {w:'Mittag (kalt)', t:'Quark oder Joghurt mit Nüssen und Beeren'},
+    {w:'Abend (frisch)', t:'Von zuhause gekocht: Fisch/Rind + viel Gemüse + halbe Avocado, wenig KH'},
+  ]},
+];
+const DAYNAMES = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+const DAYSHORT = ['So','Mo','Di','Mi','Do','Fr','Sa'];
+let essenSel = new Date().getDay();
+
+function renderEssen(sel){
+  essenSel = sel;
+  const d = WEEK[sel];
+  let html = '<div class="daypills">';
+  for(let i=1;i<=7;i++){ const idx=i%7; html += '<button class="'+(idx===sel?'on':'')+'" onclick="renderEssen('+idx+')">'+DAYSHORT[idx]+'</button>'; }
+  html += '</div>';
+  html += '<div class="dayhdr"><span class="dname">'+DAYNAMES[sel]+'</span><span class="dtype '+(d.type==='train'?'train':'rest')+'">'+(d.type==='train'?'Trainingstag':'Ruhetag')+'</span></div>';
+  if(d.cook) html += '<div class="cookday"><b>'+d.cook+'</b></div>';
+  if(d.note) html += '<div class="supp-mini"><b>'+d.note+'</b></div>';
+  html += d.meals.map(m=>'<div class="meal"><span class="when">'+m.w+'</span><span class="what">'+m.t+'</span></div>').join('');
+  html += '<div class="supp-mini"><b>Jeden Tag dazu:</b> 3–5 g Kreatin · Vitamin D3 · Magnesium am Abend · 2,5–3 L Wasser. Ziel ~165 g Protein.</div>';
+  document.getElementById('view-essen').innerHTML = html;
+}
+renderEssen(essenSel);
+
+// ---- Einkauf view (Wocheneinkauf, abhakbar) ----
+const SHOP = [
+  { cat:'Protein', items:[
+    ['Hühnerbrust (halal)','1,5 kg',9.5],
+    ['Faschiertes Rind od. Pute','1 kg',7.0],
+    ['Eier (Größe M)','20 Stück',4.0],
+    ['Magerquark','4 × 500 g',4.8],
+    ['Griechischer Joghurt','1 kg',2.5],
+    ['Thunfisch/Lachs (Dose od. TK)','4 Portionen',6.0],
+    ['Linsen/Kichererbsen','3–4 Dosen',3.0],
+  ]},
+  { cat:'Kohlenhydrate', items:[
+    ['Reis','1 kg',1.5],
+    ['Kartoffeln','2,5 kg',2.5],
+    ['Haferflocken','1 kg',1.2],
+    ['Vollkorn-Nudeln/Brot','je 1 Pkg',2.5],
+    ['Bananen','6–8 Stück',1.8],
+    ['Beeren (TK)','1 Pkg',2.0],
+  ]},
+  { cat:'Gemüse & Fette', items:[
+    ['Gemüse gemischt (frisch/TK)','reichlich',8.0],
+    ['Zwiebel/Knoblauch/Tomaten','Basis',3.0],
+    ['Olivenöl','1 Flasche',4.5],
+    ['Nüsse (gemischt)','500 g',4.0],
+    ['Avocado','2–3 Stück',3.0],
+  ]},
+  { cat:'Supplemente (Einmalkauf, hält lange)', items:[
+    ['Kreatin Monohydrat','~300 g',12.0],
+    ['Whey Protein (optional)','~1 kg',20.0],
+    ['Vitamin D3 + Magnesium','Monatsvorrat',10.0],
+  ]},
+];
+
+let shopDone = {};
+(async()=>{ try{ const r=await window.storage.get("ft:shop"); if(r) shopDone=JSON.parse(r.value)||{}; }catch(e){} })();
+
+function toggleShop(id){
+  shopDone[id] = !shopDone[id];
+  try{ window.storage.set("ft:shop", JSON.stringify(shopDone), false); }catch(e){}
+  renderEinkauf();
+}
+function resetShop(){
+  shopDone={};
+  try{ window.storage.set("ft:shop", JSON.stringify(shopDone), false); }catch(e){}
+  renderEinkauf();
+}
+
+function renderEinkauf(){
+  let food=0, supp=0, id=0;
+  let html='';
+  SHOP.forEach((c,ci)=>{
+    html += '<div class="shopcat">'+c.cat+'</div><div class="shoplist">';
+    c.items.forEach(it=>{
+      const key='i'+(id++);
+      const done=!!shopDone[key];
+      if(ci<3) food+=it[2]; else supp+=it[2];
+      html += '<div class="shopitem'+(done?' done':'')+'" onclick="toggleShop(\''+key+'\')">'
+            + '<span class="box">✓</span>'
+            + '<span class="nm">'+it[0]+'</span>'
+            + '<span class="qt">'+it[1]+'</span>'
+            + '<span class="pr">'+it[2].toFixed(0)+'€</span></div>';
+    });
+    html += '</div>';
+  });
+  html += '<div class="shoptotal"><b>Lebensmittel/Woche: ca. '+food.toFixed(0)+' €.</b> Supplemente (~'+supp.toFixed(0)+' €) sind Einmalkäufe und halten Wochen. Halal, kein Schwein. Fisch ist optional – ersetzbar durch mehr Rind/Pute.</div>';
+  html += '<div class="shopbtns"><button onclick="resetShop()">Liste zurücksetzen</button></div>';
+  document.getElementById('view-einkauf').innerHTML = html;
+}
+renderEinkauf();
+</script>
