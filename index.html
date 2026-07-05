@@ -242,6 +242,16 @@
 </div>
 
 <script>
+// Speicher-Fallback: auf echter Website (Vercel/Handy) localStorage, in Claude window.storage
+if(typeof window.storage === 'undefined' || !window.storage){
+  window.storage = {
+    async get(k){ try{ const v=localStorage.getItem(k); return v===null?null:{key:k, value:v, shared:false}; }catch(e){ return null; } },
+    async set(k,v){ try{ localStorage.setItem(k, v); return {key:k, value:v, shared:false}; }catch(e){ return null; } },
+    async delete(k){ try{ localStorage.removeItem(k); return {key:k, deleted:true, shared:false}; }catch(e){ return null; } },
+    async list(prefix){ const keys=[]; try{ for(let i=0;i<localStorage.length;i++){ const key=localStorage.key(i); if(!prefix || key.indexOf(prefix)===0) keys.push(key); } }catch(e){} return {keys, prefix, shared:false}; }
+  };
+}
+
 const KEY = d => "ft:"+d;
 const state = {prot:null, train:null, water:null, bloat:null};
 
