@@ -56,6 +56,23 @@
   textarea{width:100%; background:var(--ink); border:1px solid var(--line); border-radius:4px; color:var(--bone); font-family:'Barlow'; font-size:14px; padding:8px 10px; resize:vertical; min-height:44px;}
   .save{width:100%; background:var(--red); color:#fff; border:none; font-family:'Anton'; text-transform:uppercase; letter-spacing:1px; font-size:17px; padding:14px; border-radius:4px; cursor:pointer; margin-top:2px;}
   .save:active{transform:translateY(1px);} .save.done{background:var(--good);}
+  .savemsg{display:none; margin-top:8px; padding:11px 13px; background:var(--panel2); border:1px solid var(--red-dim); border-left:3px solid var(--red); border-radius:4px; font-size:13.5px; line-height:1.45; color:var(--bone);}
+  .savemsg.show{display:block;}
+  .savemsg b{color:var(--red); font-family:'Barlow Condensed'; text-transform:uppercase; letter-spacing:.5px; font-size:12px; display:block; margin-bottom:2px;}
+  .row{cursor:pointer;}
+  .row .arr{margin-left:auto; color:var(--grey); font-size:14px;}
+  .modal{display:none; position:fixed; inset:0; background:rgba(0,0,0,.72); z-index:50; align-items:center; justify-content:center; padding:20px;}
+  .modal.show{display:flex;}
+  .modalcard{background:var(--panel); border:1px solid var(--red); border-radius:6px; width:100%; max-width:400px; max-height:82vh; overflow-y:auto; padding:16px;}
+  .modalhead{display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--line); padding-bottom:10px; margin-bottom:12px;}
+  .modalhead span{font-family:'Anton'; font-size:18px; text-transform:uppercase;}
+  .modalx{background:var(--ink); border:1px solid var(--line); color:var(--bone); width:30px; height:30px; border-radius:4px; cursor:pointer; font-size:14px;}
+  .md-line{display:flex; justify-content:space-between; gap:12px; padding:9px 0; border-bottom:1px solid var(--line); font-size:14px;}
+  .md-line .k{color:var(--grey); font-family:'Barlow Condensed'; font-weight:600; text-transform:uppercase; letter-spacing:.5px; font-size:12px;}
+  .md-line .v{font-weight:600; text-align:right;}
+  .md-note{margin-top:12px; background:var(--ink); border:1px solid var(--line); border-radius:4px; padding:11px 12px; font-size:13.5px; line-height:1.5; color:var(--bone);}
+  .md-note .k{color:var(--red); font-family:'Barlow Condensed'; font-weight:700; text-transform:uppercase; letter-spacing:.5px; font-size:11px; display:block; margin-bottom:4px;}
+  .md-empty{color:var(--grey); font-size:13px; padding:6px 0;}
 
   /* Coach */
   .coach{background:linear-gradient(180deg,var(--panel2),var(--panel)); border:1px solid var(--red-dim);}
@@ -133,6 +150,26 @@
   .shoptotal b{color:var(--red);}
   .shopbtns{display:flex; gap:6px; margin-top:10px;}
   .shopbtns button{flex:1; background:var(--ink); border:1px solid var(--line); color:var(--grey); font-family:'Barlow Condensed'; font-weight:600; text-transform:uppercase; letter-spacing:.5px; font-size:12px; padding:9px; border-radius:4px; cursor:pointer;}
+
+  /* Ziel-Panel & Profil */
+  .goalpanel{background:linear-gradient(180deg,var(--panel2),var(--panel)); border:1px solid var(--red-dim); border-radius:4px; padding:14px; margin-bottom:10px;}
+  .gp-head{display:flex; justify-content:space-between; align-items:center;}
+  .gp-badge{font-family:'Anton'; text-transform:uppercase; font-size:16px; letter-spacing:.5px; padding:4px 12px; border-radius:4px;}
+  .gp-badge.lose{background:var(--red); color:#fff;}
+  .gp-badge.hold{background:var(--panel2); color:var(--bone); border:1px solid var(--grey);}
+  .gp-badge.gain{background:var(--good); color:#fff;}
+  .gp-edit{background:var(--ink); border:1px solid var(--line); color:var(--grey); font-family:'Barlow Condensed'; font-weight:600; text-transform:uppercase; letter-spacing:.5px; font-size:11px; padding:6px 11px; border-radius:4px; cursor:pointer;}
+  .gp-cal{font-family:'Anton'; font-size:34px; margin-top:10px; line-height:1;}
+  .gp-cal span{font-family:'Barlow Condensed'; font-weight:600; font-size:14px; color:var(--grey);}
+  .gp-macros{display:flex; gap:8px; margin-top:10px;}
+  .gp-macros span{flex:1; background:var(--ink); border:1px solid var(--line); border-radius:4px; padding:8px 6px; text-align:center; font-family:'Barlow Condensed'; font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.5px; color:var(--grey); display:flex; flex-direction:column; gap:2px;}
+  .gp-macros span b{font-family:'Anton'; font-size:17px; color:var(--bone); letter-spacing:0;}
+  .gp-note{font-size:11.5px; color:var(--grey); margin-top:10px; line-height:1.4;}
+  .pform{margin-top:12px;}
+  .pf-row{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:9px;}
+  .pf-row label{font-family:'Barlow Condensed'; font-weight:600; text-transform:uppercase; letter-spacing:.5px; font-size:12px; color:var(--grey); flex:1;}
+  .pf-row input, .pf-row select{background:var(--ink); border:1px solid var(--line); color:var(--bone); font-family:'Barlow'; font-size:15px; padding:8px 10px; border-radius:4px; width:150px;}
+  .pf-row select{cursor:pointer;}
 </style>
 
 <div id="app">
@@ -225,6 +262,7 @@
       <textarea id="note" placeholder="Wie war der Tag, Schlaf, Energie..."></textarea>
     </div>
     <button class="save" id="save">Tag speichern</button>
+    <div class="savemsg" id="savemsg"></div>
   </div>
 
   <div class="date">Verlauf</div>
@@ -238,7 +276,14 @@
 
   <div id="view-einkauf"></div>
 
-  <div class="foot">Gewicht zählt im Wochenschnitt, nicht am Einzeltag. · Ziel ~0,5 kg/Woche</div>
+  <div class="foot">Gewicht zählt im Wochenschnitt, nicht am Einzeltag. · Ziel & Werte im Essen-Tab einstellbar</div>
+
+  <div id="daymodal" class="modal" onclick="closeDay(event)">
+    <div class="modalcard" onclick="event.stopPropagation()">
+      <div class="modalhead"><span id="md-date"></span><button class="modalx" onclick="closeDay()">✕</button></div>
+      <div id="md-body"></div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -307,6 +352,28 @@ async function allEntries(){
   refresh();
 })();
 
+const MOTIVATION = [
+  "Ein Tag im Kasten. So werden Kämpfer gemacht – nicht an einem Tag, sondern an jedem.",
+  "Eingetragen. Disziplin ist, es auch dann zu tun, wenn keiner zuschaut. Stark.",
+  "Wieder ein Baustein gelegt. Der Ring belohnt die, die dranbleiben.",
+  "Erledigt. Kleine Schritte, jeden Tag – das schlägt jede Motivation.",
+  "Sauber getrackt. Wer misst, macht Fortschritt sichtbar. Weiter so.",
+  "Notiert. Champions werden in den langweiligen Wochen gemacht, nicht in der einen guten Session.",
+  "Ein Tag mehr auf dem Konto. Konstanz ist deine stärkste Waffe.",
+  "Gespeichert. Der harte Weg ist der einzige, der hält. Du gehst ihn.",
+  "Abgehakt. Heute war ein Schritt Richtung leichter, schneller, stärker.",
+  "Drin. Nicht perfekt sein, nur nicht aufhören – das ist der ganze Trick.",
+  "Guter Mann. Jeder Eintrag ist ein Versprechen an dich selbst, das du hältst.",
+  "Erledigt. Der Körper vergisst nichts – jede gute Woche zahlt sich im Ring aus.",
+  "Getrackt. Fortschritt ist leise. Er passiert genau in solchen Momenten.",
+  "Ein weiterer Tag Disziplin. Genau das trennt die, die reden, von denen, die's tun.",
+  "Im Kasten. Bleib geduldig mit dem Prozess und hart mit dir selbst.",
+  "Sauber. Der Wochenschnitt entscheidet – und den baust du Tag für Tag.",
+  "Notiert. Du zeigst auf, jeden Tag. Das ist mehr als die meisten schaffen.",
+  "Erledigt. Kopf hoch, Deckung oben, weiter geht's.",
+];
+function motivate(){ return MOTIVATION[Math.floor(Math.random()*MOTIVATION.length)]; }
+
 document.getElementById('save').onclick = async ()=>{
   const w = parseFloat(document.getElementById('wt').value);
   const entry = {
@@ -319,6 +386,9 @@ document.getElementById('save').onclick = async ()=>{
     await window.storage.set(KEY(entry.date), JSON.stringify(entry), false);
     const btn=document.getElementById('save');
     btn.textContent="Gespeichert ✓"; btn.classList.add('done');
+    const msg=document.getElementById('savemsg');
+    msg.innerHTML='<b>Corner</b>'+motivate();
+    msg.className='savemsg show';
     setTimeout(()=>{ btn.textContent="Tag speichern"; btn.classList.remove('done'); },1400);
     refresh();
   }catch(e){
@@ -333,6 +403,30 @@ function weekWindow(offset){ // offset 0 = last 7 days incl today, 1 = the 7 bef
   return {start:iso(start), end:iso(end)};
 }
 function inRange(d,w){ return d>=w.start && d<=w.end; }
+
+// ---- Tag-Detailansicht ----
+const LBL = {
+  prot:{ja:'Ja getroffen', fast:'Fast', nein:'Nicht getroffen'},
+  train:{muay:'Muay Thai', kraft:'Krafttraining', ruhe:'Ruhetag'},
+  water:{low:'unter 2 L', ok:'2–3 L', high:'über 3 L'},
+  bloat:{ja:'Ja, aufgebläht', nein:'Nein'},
+};
+async function openDay(date){
+  const e = await loadDay(date);
+  const md=document.getElementById('daymodal');
+  document.getElementById('md-date').textContent = fmtDE(date);
+  if(!e){ document.getElementById('md-body').innerHTML='<div class="md-empty">Kein Eintrag für diesen Tag.</div>'; md.className='modal show'; return; }
+  let b='';
+  b += '<div class="md-line"><span class="k">Gewicht</span><span class="v">'+(e.weight?e.weight.toFixed(1)+' kg':'–')+'</span></div>';
+  b += '<div class="md-line"><span class="k">Protein</span><span class="v">'+(e.prot?LBL.prot[e.prot]:'–')+'</span></div>';
+  b += '<div class="md-line"><span class="k">Training</span><span class="v">'+(e.train?LBL.train[e.train]:'–')+'</span></div>';
+  b += '<div class="md-line"><span class="k">Wasser</span><span class="v">'+(e.water?LBL.water[e.water]:'–')+'</span></div>';
+  b += '<div class="md-line"><span class="k">Bauch</span><span class="v">'+(e.bloat?LBL.bloat[e.bloat]:'–')+'</span></div>';
+  if(e.note) b += '<div class="md-note"><span class="k">Notiz</span>'+e.note.replace(/</g,'&lt;')+'</div>';
+  document.getElementById('md-body').innerHTML=b;
+  md.className='modal show';
+}
+function closeDay(){ document.getElementById('daymodal').className='modal'; }
 
 async function refresh(){
   const list = await allEntries();
@@ -350,13 +444,23 @@ async function refresh(){
   const avgOf=arr=>{ const v=arr.filter(e=>e.weight).map(e=>e.weight); return v.length? v.reduce((a,b)=>a+b,0)/v.length : null; };
   const a0=avgOf(cur7), a1=avgOf(prev7);
   const avgEl=document.getElementById('avg'), delEl=document.getElementById('delta');
+
+  // aktuelles Gewicht aus letztem Eintrag -> Ziel im Essen-Tab passt sich an
+  const latest = list.find(e=>e.weight);
+  if(latest && typeof curWeight!=='undefined'){
+    if(latest.weight!==curWeight){ curWeight=latest.weight; if(typeof renderEssen==='function') renderEssen(essenSel); }
+  }
+  const goal = (typeof PROFILE!=='undefined') ? PROFILE.goal : 'lose';
+
   if(a0){
     avgEl.innerHTML = a0.toFixed(1)+'<u> kg</u>';
     if(a1){
       const d=a0-a1; const s=d.toFixed(1);
-      if(d<-0.05){ delEl.className='sub delta down'; delEl.textContent='▼ '+Math.abs(d).toFixed(1)+' kg vs. Vorwoche'; }
-      else if(d>0.05){ delEl.className='sub delta up'; delEl.textContent='▲ '+s+' kg vs. Vorwoche'; }
-      else { delEl.className='sub delta flat'; delEl.textContent='± stabil vs. Vorwoche'; }
+      // "gut" = Richtung passend zum Ziel
+      const goodDown = (goal!=='gain'); // abnehmen/halten: runter tendenziell ok; zunehmen: rauf ok
+      if(Math.abs(d)<=0.05){ delEl.className='sub delta flat'; delEl.textContent='± stabil vs. Vorwoche'; }
+      else if(d<0){ delEl.className='sub delta '+(goodDown?'down':'up'); delEl.textContent='▼ '+Math.abs(d).toFixed(1)+' kg vs. Vorwoche'; }
+      else { delEl.className='sub delta '+(goodDown?'up':'down'); delEl.textContent='▲ '+s+' kg vs. Vorwoche'; }
     } else { delEl.className='sub delta flat'; delEl.textContent='Basiswoche – Referenz'; }
   } else { avgEl.innerHTML='–<u> kg</u>'; delEl.textContent='warte auf Daten'; }
 
@@ -376,7 +480,7 @@ async function refresh(){
     if(e.train==='muay') chips+='<span class="chip t">Muay Thai</span>';
     else if(e.train==='kraft') chips+='<span class="chip t">Kraft</span>';
     if(e.bloat==='ja') chips+='<span class="chip b">Bauch</span>';
-    return '<div class="row"><span class="d">'+shortDE(e.date)+'</span><span class="kg">'+(e.weight?e.weight.toFixed(1):'–')+'</span>'+chips+'</div>';
+    return '<div class="row" onclick="openDay(\''+e.date+'\')"><span class="d">'+shortDE(e.date)+'</span><span class="kg">'+(e.weight?e.weight.toFixed(1):'–')+'</span>'+chips+'<span class="arr">›</span></div>';
   }).join('');
 }
 
@@ -450,6 +554,35 @@ const TIPS = {
   streakGood:[
     "Starke Serie beim Eintragen. Genau diese Konstanz ist es, die am Ende den Unterschied macht.",
     "Du trackst jeden Tag – das ist Disziplin, die sich auf den Ring uebertraegt. Respekt.",
+  ],
+  gainGood:[
+    "Sauber. Du nimmst kontrolliert zu – langsam heisst mehr Muskel, weniger Fett. Genau das Tempo.",
+    "Das Gewicht steigt im richtigen Bereich. Weiter im leichten Ueberschuss essen, Protein hoch halten.",
+    "Guter Aufbau-Trend. Kombinier das mit schwerem Training, dann landet das Plus im Muskel.",
+    "Perfektes Aufbau-Tempo. Nicht gieriger werden – schneller heisst nur mehr Fett.",
+  ],
+  gainFast:[
+    "Du nimmst zu schnell zu. Zieh den Ueberschuss etwas zurueck, sonst kommt zu viel Fett mit.",
+    "Zu flott rauf. Ein bisschen weniger essen – Muskel wächst nicht schneller, nur das Fett.",
+    "Bremsen beim Aufbau. Mehr als ein halbes Kilo die Woche ist meist Fett, nicht Muskel.",
+  ],
+  gainStall:[
+    "Gewicht steht, aber du willst zunehmen. Pack pro Tag eine Handvoll mehr Reis oder einen Shake drauf.",
+    "Kein Zuwachs diese Woche. Iss konsequent im Ueberschuss – ein zusaetzlicher Snack am Tag reicht oft.",
+    "Aufbau haengt. Erhoeh die Kohlenhydrate rund ums Training, da wachsen Kraft und Masse.",
+  ],
+  gainDown:[
+    "Du verlierst Gewicht, willst aber aufbauen. Du isst zu wenig – erhoeh die Portionen deutlich.",
+    "Runter statt rauf. Fuer Aufbau brauchst du mehr Kalorien, nicht weniger. Shake und Snacks dazu.",
+    "Das geht in die falsche Richtung. Mehr essen, vor allem mehr Kohlenhydrate und Protein.",
+  ],
+  holdGood:[
+    "Gewicht stabil – genau was du willst. Halte die Routine, dein Koerper ist im Gleichgewicht.",
+    "Sauber gehalten. Jetzt kannst du an Kraft und Technik feilen, ohne die Waage zu jagen.",
+  ],
+  holdDrift:[
+    "Dein Gewicht driftet, obwohl du halten willst. Justier die Portionen leicht in die Gegenrichtung.",
+    "Nicht ganz stabil. Schau auf die Wochenenden und die Portionsgroessen, dann pendelt es sich ein.",
   ],
 };
 const GENERAL = [
@@ -539,13 +672,24 @@ document.getElementById('coachbtn').onclick = async ()=>{
     const avgOf=arr=>{ const v=arr.filter(e=>e.weight).map(e=>e.weight); return v.length? v.reduce((a,b)=>a+b,0)/v.length:null; };
     const a0=avgOf(cur7), a1=avgOf(prev7);
 
-    // 1) Gewichts-Trend
+    // 1) Gewichts-Trend – abhängig vom Ziel
     if(a0!==null && a1!==null){
       const d=a0-a1;
-      if(d<-0.7) parts.push(rnd(TIPS.weightFast));
-      else if(d<-0.1) parts.push(rnd(TIPS.weightGood));
-      else if(d>0.15) parts.push(rnd(TIPS.weightUp));
-      else parts.push(rnd(TIPS.weightStall));
+      const goal = (typeof PROFILE!=='undefined') ? PROFILE.goal : 'lose';
+      if(goal==='gain'){
+        if(d>0.6) parts.push(rnd(TIPS.gainFast));
+        else if(d>0.05) parts.push(rnd(TIPS.gainGood));
+        else if(d<-0.1) parts.push(rnd(TIPS.gainDown));
+        else parts.push(rnd(TIPS.gainStall));
+      } else if(goal==='hold'){
+        if(Math.abs(d)<=0.3) parts.push(rnd(TIPS.holdGood));
+        else parts.push(rnd(TIPS.holdDrift));
+      } else {
+        if(d<-0.7) parts.push(rnd(TIPS.weightFast));
+        else if(d<-0.1) parts.push(rnd(TIPS.weightGood));
+        else if(d>0.15) parts.push(rnd(TIPS.weightUp));
+        else parts.push(rnd(TIPS.weightStall));
+      }
     } else if(a0===null){
       parts.push(rnd(TIPS.weightNoData));
     }
@@ -639,60 +783,152 @@ function switchView(v){
 // index nach Wochentag: 0=So ... 6=Sa
 const WEEK = [
   { type:'rest', meals:[  // Sonntag
-    {w:'Frühstück', t:'Machst du dir selbst – z. B. Eier oder Magerquark mit Beeren'},
-    {w:'Mittag (kalt)', t:'Magerquark (250 g) + Obst, oder Thunfisch-Salat – kein Kochen'},
-    {w:'Abend (frisch)', t:'Von zuhause gekocht: Fleisch/Fisch + Gemüse, wenig Reis/Brot'},
+    {w:'Frühstück', t:'3 Eier + 40 g Haferflocken mit Beeren, oder Magerquark (250 g) mit Obst'},
+    {w:'Mittag (kalt)', t:'Magerquark (250 g) + Obst, oder großer Thunfisch-Salat – kein Kochen'},
+    {w:'Abend (frisch)', t:'Von zuhause gekocht: {P} Fleisch/Fisch + {C} + viel Gemüse'},
   ]},
   { type:'train', meals:[  // Montag
-    {w:'Frühstück', t:'Machst du dir selbst – z. B. Eier + Haferflocken + Beeren'},
+    {w:'Frühstück', t:'3 Eier + 2 Eiweiß, 60 g Haferflocken, Beeren'},
     {w:'Mittag (kalt)', t:'Magerquark (250 g) + Banane, oder Thunfisch-Salat – kein Kochen'},
     {w:'Vor Training', t:'1 Banane + Kaffee'},
-    {w:'Abend (frisch)', t:'Von zuhause gekocht: 180 g Hühnchen + 200 g Reis + Gemüse'},
+    {w:'Abend (frisch)', t:'Von zuhause gekocht: {P} Hühnchen + {C} Reis + Gemüse'},
   ]},
   { type:'train', meals:[  // Dienstag
-    {w:'Frühstück', t:'Machst du dir selbst'},
+    {w:'Frühstück', t:'Rührei aus 3 Eiern mit Vollkornbrot, oder Magerquark (250 g) mit Banane und Nüssen'},
     {w:'Mittag (kalt)', t:'Griechischer Joghurt + Nüsse + Obst, oder Vollkornbrot mit Ei/Thunfisch'},
     {w:'Vor Training', t:'1 Banane + Kaffee'},
-    {w:'Abend (frisch)', t:'Von zuhause gekocht: 180 g Pute/Rind + Kartoffeln + Gemüse'},
+    {w:'Abend (frisch)', t:'Von zuhause gekocht: {P} Pute/Rind + {C} Kartoffeln + Gemüse'},
   ]},
-  { type:'rest', note:'Kraft-Einheit A. Kohlenhydrate heute runter.', meals:[  // Mittwoch
-    {w:'Frühstück', t:'Machst du dir selbst'},
-    {w:'Mittag (kalt)', t:'Thunfisch mit Gemüse, oder Quark + Nüsse – kein Kochen'},
-    {w:'Abend (frisch)', t:'Von zuhause gekocht: Faschiertes mit Linsen + viel Gemüse, wenig Reis'},
+  { type:'rest', note:'Kraft-Einheit A. Kohlenhydrate heute etwas runter.', meals:[  // Mittwoch
+    {w:'Frühstück', t:'3 Eier + 2 Eiweiß, 40 g Haferflocken, Beeren'},
+    {w:'Mittag (kalt)', t:'Thunfisch mit Gemüse, oder Magerquark (250 g) + Nüsse – kein Kochen'},
+    {w:'Abend (frisch)', t:'Von zuhause gekocht: {P} Faschiertes mit Linsen + viel Gemüse + {C}'},
   ]},
   { type:'train', meals:[  // Donnerstag
-    {w:'Frühstück', t:'Machst du dir selbst'},
+    {w:'Frühstück', t:'3 Eier + 60 g Haferflocken mit Beeren'},
     {w:'Mittag (kalt)', t:'Magerquark (250 g) + Banane, oder Thunfisch-Salat'},
     {w:'Vor Training', t:'1 Banane + Kaffee'},
-    {w:'Abend (frisch)', t:'Von zuhause gekocht: 180 g Lachs/Fisch + Reis + Gemüse'},
+    {w:'Abend (frisch)', t:'Von zuhause gekocht: {P} Lachs/Fisch + {C} Reis + Gemüse'},
   ]},
   { type:'train', meals:[  // Freitag
-    {w:'Frühstück', t:'Machst du dir selbst'},
+    {w:'Frühstück', t:'Omelett aus 3 Eiern mit Gemüse, oder Magerquark (250 g) mit Banane und Nüssen'},
     {w:'Mittag (kalt)', t:'Vollkornbrot mit Ei/Thunfisch, oder Joghurt + Nüsse'},
     {w:'Vor Training', t:'1 Banane + Kaffee'},
-    {w:'Abend (frisch)', t:'Von zuhause gekocht: 180 g Hühnchen/Rind + Kartoffeln oder Reis + Gemüse'},
+    {w:'Abend (frisch)', t:'Von zuhause gekocht: {P} Hühnchen/Rind + {C} Kartoffeln oder Reis + Gemüse'},
   ]},
-  { type:'rest', note:'Kraft-Einheit B. Kohlenhydrate runter, mehr Gemüse & gute Fette.', meals:[  // Samstag
-    {w:'Frühstück', t:'Machst du dir selbst'},
-    {w:'Mittag (kalt)', t:'Quark oder Joghurt mit Nüssen und Beeren'},
-    {w:'Abend (frisch)', t:'Von zuhause gekocht: Fisch/Rind + viel Gemüse + halbe Avocado, wenig KH'},
+  { type:'rest', note:'Kraft-Einheit B. Mehr Gemüse & gute Fette.', meals:[  // Samstag
+    {w:'Frühstück', t:'Omelett aus 4 Eiern mit Gemüse'},
+    {w:'Mittag (kalt)', t:'Magerquark oder griechischer Joghurt mit Nüssen und Beeren'},
+    {w:'Abend (frisch)', t:'Von zuhause gekocht: {P} Fisch/Rind + viel Gemüse + halbe Avocado + {C}'},
   ]},
 ];
 const DAYNAMES = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
 const DAYSHORT = ['So','Mo','Di','Mi','Do','Fr','Sa'];
 let essenSel = new Date().getDay();
 
-function renderEssen(sel){
-  essenSel = sel;
-  const d = WEEK[sel];
+// ---- Profil & Ziel ----
+let PROFILE = {sex:'m', age:35, height:178, weight:83, days:4, goal:'lose'};
+let curWeight = PROFILE.weight;
+let showProfileForm = false;
+(async()=>{
+  try{ const r=await window.storage.get("ft:profile"); if(r){ PROFILE=Object.assign(PROFILE, JSON.parse(r.value)); curWeight=PROFILE.weight; } else { showProfileForm=true; } }catch(e){}
+  if(typeof renderEssen==='function') renderEssen(essenSel);
+})();
+
+const GOALS = {
+  lose:{label:'Abnehmen', kcal:-500, protein:2.0},
+  hold:{label:'Halten',  kcal:0,    protein:1.8},
+  gain:{label:'Zunehmen', kcal:350,  protein:2.0},
+};
+function actFactor(days){ if(days<=1) return 1.35; if(days<=3) return 1.5; if(days<=5) return 1.6; return 1.75; }
+
+function computeTargets(p, wt){
+  const w = wt || p.weight;
+  const bmr = 10*w + 6.25*p.height - 5*p.age + (p.sex==='m'?5:-161);
+  const tdee = bmr * actFactor(p.days);
+  const g = GOALS[p.goal] || GOALS.lose;
+  let kcal = tdee + g.kcal;
+  if(p.goal==='lose'){ const floor = Math.max(bmr*1.2, p.sex==='m'?1500:1200); kcal = Math.max(kcal, floor); }
+  const protein = Math.round(w * g.protein);
+  const fat = Math.round(kcal*0.25/9);
+  let carbs = Math.round((kcal - protein*4 - fat*9)/4); if(carbs<50) carbs=50;
+  return {kcal:Math.round(kcal), protein, fat, carbs, tdee:Math.round(tdee), goal:p.goal, w};
+}
+function portions(goal){
+  if(goal==='gain') return {P:'220–250 g', C:'große Portion Reis/Kartoffeln (~300–350 g gekocht)'};
+  if(goal==='hold') return {P:'180 g', C:'normale Portion Reis/Kartoffeln (~200–250 g gekocht)'};
+  return {P:'180 g', C:'kontrollierte Portion Reis/Kartoffeln (~150–200 g gekocht)'};
+}
+function suppLine(goal){
+  let s='Kreatin 5 g · Vitamin D3 · Magnesium abends · 2,5–3 L Wasser';
+  if(goal==='lose') s+=' · Kaffee vor dem Training als Booster';
+  if(goal==='gain') s+=' · Whey Protein hilft, Protein & Kalorien zu treffen';
+  return s;
+}
+
+function sel(id,val,opts){ // opts: [[value,label],...]
+  return '<select id="'+id+'">'+opts.map(o=>'<option value="'+o[0]+'"'+(String(o[0])===String(val)?' selected':'')+'>'+o[1]+'</option>').join('')+'</select>';
+}
+function profileFormHTML(){
+  return '<div class="pform">'
+   + '<div class="pf-row"><label>Geschlecht</label>'+sel('pf-sex',PROFILE.sex,[['m','Mann'],['w','Frau']])+'</div>'
+   + '<div class="pf-row"><label>Alter</label><input id="pf-age" type="number" inputmode="numeric" value="'+PROFILE.age+'"></div>'
+   + '<div class="pf-row"><label>Größe (cm)</label><input id="pf-height" type="number" inputmode="numeric" value="'+PROFILE.height+'"></div>'
+   + '<div class="pf-row"><label>Gewicht (kg)</label><input id="pf-weight" type="number" inputmode="decimal" step="0.1" value="'+PROFILE.weight+'"></div>'
+   + '<div class="pf-row"><label>Training / Woche</label>'+sel('pf-days',PROFILE.days,[[0,'0–1'],[2,'2–3'],[4,'4–5'],[6,'6–7']])+'</div>'
+   + '<div class="pf-row"><label>Ziel</label>'+sel('pf-goal',PROFILE.goal,[['lose','Abnehmen'],['hold','Halten'],['gain','Zunehmen']])+'</div>'
+   + '<button class="save" onclick="saveProfile()">Profil speichern</button>'
+   + '</div>';
+}
+function saveProfile(){
+  const gv=id=>document.getElementById(id).value;
+  PROFILE = {
+    sex: gv('pf-sex'),
+    age: Math.max(14, parseInt(gv('pf-age'))||35),
+    height: Math.max(120, parseInt(gv('pf-height'))||178),
+    weight: Math.max(35, parseFloat(gv('pf-weight'))||83),
+    days: parseInt(gv('pf-days'))||0,
+    goal: gv('pf-goal')
+  };
+  curWeight = PROFILE.weight;
+  try{ window.storage.set("ft:profile", JSON.stringify(PROFILE), false); }catch(e){}
+  showProfileForm=false;
+  renderEssen(essenSel);
+  if(typeof refresh==='function') refresh();
+}
+function toggleProfileForm(){ showProfileForm=!showProfileForm; renderEssen(essenSel); }
+
+function renderEssen(s){
+  essenSel = s;
+  const d = WEEK[s];
+  const t = computeTargets(PROFILE, curWeight);
+  const g = GOALS[PROFILE.goal] || GOALS.lose;
+  const pr = portions(PROFILE.goal);
+
   let html = '<div class="daypills">';
-  for(let i=1;i<=7;i++){ const idx=i%7; html += '<button class="'+(idx===sel?'on':'')+'" onclick="renderEssen('+idx+')">'+DAYSHORT[idx]+'</button>'; }
+  for(let i=1;i<=7;i++){ const idx=i%7; html += '<button class="'+(idx===s?'on':'')+'" onclick="renderEssen('+idx+')">'+DAYSHORT[idx]+'</button>'; }
   html += '</div>';
-  html += '<div class="dayhdr"><span class="dname">'+DAYNAMES[sel]+'</span><span class="dtype '+(d.type==='train'?'train':'rest')+'">'+(d.type==='train'?'Trainingstag':'Ruhetag')+'</span></div>';
-  if(d.cook) html += '<div class="cookday"><b>'+d.cook+'</b></div>';
+
+  // Tagesziel-Panel
+  html += '<div class="goalpanel">'
+        + '<div class="gp-head"><span class="gp-badge '+PROFILE.goal+'">'+g.label+'</span>'
+        + '<button class="gp-edit" onclick="toggleProfileForm()">'+(showProfileForm?'schließen':'Profil anpassen')+'</button></div>';
+  if(showProfileForm){
+    html += profileFormHTML();
+  } else {
+    html += '<div class="gp-cal">'+t.kcal+' <span>kcal / Tag</span></div>'
+          + '<div class="gp-macros"><span><b>'+t.protein+' g</b>Protein</span><span><b>'+t.fat+' g</b>Fett</span><span><b>'+t.carbs+' g</b>KH</span></div>'
+          + '<div class="gp-note">berechnet für '+t.w+' kg · '+PROFILE.days+ (PROFILE.days>=6?'–7':'') +'× Training/Woche. Wieg dich weiter – das Ziel passt sich deinem aktuellen Gewicht an.</div>'
+          + '<div class="supp-mini"><b>Supplemente:</b> '+suppLine(PROFILE.goal)+'</div>';
+  }
+  html += '</div>';
+
+  // Tag
+  html += '<div class="dayhdr"><span class="dname">'+DAYNAMES[s]+'</span><span class="dtype '+(d.type==='train'?'train':'rest')+'">'+(d.type==='train'?'Trainingstag':'Ruhetag')+'</span></div>';
   if(d.note) html += '<div class="supp-mini"><b>'+d.note+'</b></div>';
-  html += d.meals.map(m=>'<div class="meal"><span class="when">'+m.w+'</span><span class="what">'+m.t+'</span></div>').join('');
-  html += '<div class="supp-mini"><b>Jeden Tag dazu:</b> 3–5 g Kreatin · Vitamin D3 · Magnesium am Abend · 2,5–3 L Wasser. Ziel ~165 g Protein.</div>';
+  let meals = d.meals.map(m=>({w:m.w, t:m.t.replace('{P}',pr.P).replace('{C}',pr.C)}));
+  if(PROFILE.goal==='gain') meals.push({w:'Snack', t:'Whey-Shake mit Banane + Haferflocken, oder Handvoll Nüsse + Trockenobst – für den Kalorienüberschuss'});
+  html += meals.map(m=>'<div class="meal"><span class="when">'+m.w+'</span><span class="what">'+m.t+'</span></div>').join('');
   document.getElementById('view-essen').innerHTML = html;
 }
 renderEssen(essenSel);
@@ -700,7 +936,7 @@ renderEssen(essenSel);
 // ---- Einkauf view (Wocheneinkauf, abhakbar) ----
 const SHOP = [
   { cat:'Protein', items:[
-    ['Hühnerbrust (halal)','1,5 kg',9.5],
+    ['Hühnerbrust','1,5 kg',9.5],
     ['Faschiertes Rind od. Pute','1 kg',7.0],
     ['Eier (Größe M)','20 Stück',4.0],
     ['Magerquark','4 × 500 g',4.8],
@@ -761,7 +997,7 @@ function renderEinkauf(){
     });
     html += '</div>';
   });
-  html += '<div class="shoptotal"><b>Lebensmittel/Woche: ca. '+food.toFixed(0)+' €.</b> Supplemente (~'+supp.toFixed(0)+' €) sind Einmalkäufe und halten Wochen. Halal, kein Schwein. Fisch ist optional – ersetzbar durch mehr Rind/Pute.</div>';
+  html += '<div class="shoptotal"><b>Lebensmittel/Woche: ca. '+food.toFixed(0)+' €.</b> Supplemente (~'+supp.toFixed(0)+' €) sind Einmalkäufe und halten Wochen. Fisch ist optional – ersetzbar durch mehr Rind/Pute.</div>';
   html += '<div class="shopbtns"><button onclick="resetShop()">Liste zurücksetzen</button></div>';
   document.getElementById('view-einkauf').innerHTML = html;
 }
