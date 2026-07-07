@@ -73,6 +73,8 @@
   .md-note{margin-top:12px; background:var(--ink); border:1px solid var(--line); border-radius:4px; padding:11px 12px; font-size:13.5px; line-height:1.5; color:var(--bone);}
   .md-note .k{color:var(--red); font-family:'Barlow Condensed'; font-weight:700; text-transform:uppercase; letter-spacing:.5px; font-size:11px; display:block; margin-bottom:4px;}
   .md-empty{color:var(--grey); font-size:13px; padding:6px 0;}
+  .deletebtn{width:100%; background:transparent; border:1px solid var(--line); color:var(--grey); font-family:'Barlow Condensed'; font-weight:600; text-transform:uppercase; letter-spacing:.5px; font-size:12px; padding:10px; border-radius:4px; cursor:pointer; margin-top:8px;}
+  .deletebtn:active{border-color:var(--red); color:var(--red);}
 
   /* Coach */
   .coach{background:linear-gradient(180deg,var(--panel2),var(--panel)); border:1px solid var(--red-dim);}
@@ -404,28 +406,56 @@ function weekWindow(offset){ // offset 0 = last 7 days incl today, 1 = the 7 bef
 }
 function inRange(d,w){ return d>=w.start && d<=w.end; }
 
-// ---- Tag-Detailansicht ----
-const LBL = {
-  prot:{ja:'Ja getroffen', fast:'Fast', nein:'Nicht getroffen'},
-  train:{muay:'Muay Thai', kraft:'Krafttraining', ruhe:'Ruhetag'},
-  water:{low:'unter 2 L', ok:'2–3 L', high:'über 3 L'},
-  bloat:{ja:'Ja, aufgebläht', nein:'Nein'},
-};
+// ---- Tag-Detail / Bearbeiten ----
+let medit = null;
+
 async function openDay(date){
-  const e = await loadDay(date);
-  const md=document.getElementById('daymodal');
+  const e = await loadDay(date) || {date:date, weight:null, prot:null, train:null, water:null, bloat:null, note:''};
+  medit = {date:date, weight:e.weight, prot:e.prot, train:e.train, water:e.water, bloat:e.bloat, note:e.note||''};
   document.getElementById('md-date').textContent = fmtDE(date);
-  if(!e){ document.getElementById('md-body').innerHTML='<div class="md-empty">Kein Eintrag für diesen Tag.</div>'; md.className='modal show'; return; }
-  let b='';
-  b += '<div class="md-line"><span class="k">Gewicht</span><span class="v">'+(e.weight?e.weight.toFixed(1)+' kg':'–')+'</span></div>';
-  b += '<div class="md-line"><span class="k">Protein</span><span class="v">'+(e.prot?LBL.prot[e.prot]:'–')+'</span></div>';
-  b += '<div class="md-line"><span class="k">Training</span><span class="v">'+(e.train?LBL.train[e.train]:'–')+'</span></div>';
-  b += '<div class="md-line"><span class="k">Wasser</span><span class="v">'+(e.water?LBL.water[e.water]:'–')+'</span></div>';
-  b += '<div class="md-line"><span class="k">Bauch</span><span class="v">'+(e.bloat?LBL.bloat[e.bloat]:'–')+'</span></div>';
-  if(e.note) b += '<div class="md-note"><span class="k">Notiz</span>'+e.note.replace(/</g,'&lt;')+'</div>';
-  document.getElementById('md-body').innerHTML=b;
-  md.className='modal show';
+  renderDayEdit();
+  document.getElementById('daymodal').className='modal show';
 }
+
+function medCapture(){
+  const w=document.getElementById('med-wt'); if(w){ const v=parseFloat(w.value); medit.weight=isNaN(v)?null:v; }
+  const n=document.getElementById('med-note'); if(n){ medit.note=n.value; }
+}
+function medSeg(field,val){ medCapture(); medit[field]=(medit[field]===val?null:val); renderDayEdit(); }
+
+function segGroup(field,opts){
+  return '<div class="seg">'+opts.map(o=>{
+    const cls=((o[2]||'')+(medit[field]===o[0]?' on':'')).trim();
+    return '<button class="'+cls+'" onclick="medSeg(\''+field+'\',\''+o[0]+'\')">'+o[1]+'</button>';
+  }).join('')+'</div>';
+}
+
+function renderDayEdit(){
+  let b='';
+  b += '<div class="field"><label>Gewicht (kg)</label><div class="wt"><input id="med-wt" type="number" inputmode="decimal" step="0.1" value="'+(medit.weight!=null?medit.weight:'')+'" placeholder="–"><span>kg</span></div></div>';
+  b += '<div class="field"><label>Protein getroffen</label>'+segGroup('prot',[['ja','Ja','g'],['fast','Fast','w'],['nein','Nein','']])+'</div>';
+  b += '<div class="field"><label>Training</label>'+segGroup('train',[['muay','Muay Thai',''],['kraft','Kraft',''],['ruhe','Ruhe','']])+'</div>';
+  b += '<div class="field"><label>Wasser</label>'+segGroup('water',[['low','unter 2 L',''],['ok','2–3 L','g'],['high','über 3 L','g']])+'</div>';
+  b += '<div class="field"><label>Bauch aufgebläht?</label>'+segGroup('bloat',[['nein','Nein','g'],['ja','Ja','w']])+'</div>';
+  b += '<div class="field"><label>Notiz</label><textarea id="med-note" placeholder="Schlaf, Energie, wie war das Training...">'+(medit.note||'').replace(/</g,'&lt;')+'</textarea></div>';
+  b += '<button class="save" onclick="saveDay()">Änderungen speichern</button>';
+  b += '<button class="deletebtn" onclick="deleteDay()">Diesen Tag löschen</button>';
+  document.getElementById('md-body').innerHTML=b;
+}
+
+async function saveDay(){
+  medCapture();
+  const entry={date:medit.date, weight:medit.weight, prot:medit.prot, train:medit.train, water:medit.water, bloat:medit.bloat, note:(medit.note||'').trim()};
+  try{ await window.storage.set(KEY(entry.date), JSON.stringify(entry), false); }catch(e){}
+  closeDay(); refresh();
+}
+
+async function deleteDay(){
+  if(!confirm('Diesen Tag wirklich löschen?')) return;
+  try{ await window.storage.delete(KEY(medit.date)); }catch(e){}
+  closeDay(); refresh();
+}
+
 function closeDay(){ document.getElementById('daymodal').className='modal'; }
 
 async function refresh(){
