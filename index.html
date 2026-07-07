@@ -167,6 +167,20 @@
   .gp-macros span{flex:1; background:var(--ink); border:1px solid var(--line); border-radius:4px; padding:8px 6px; text-align:center; font-family:'Barlow Condensed'; font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.5px; color:var(--grey); display:flex; flex-direction:column; gap:2px;}
   .gp-macros span b{font-family:'Anton'; font-size:17px; color:var(--bone); letter-spacing:0;}
   .gp-note{font-size:11.5px; color:var(--grey); margin-top:10px; line-height:1.4;}
+  .wprog{margin-top:12px; background:var(--ink); border:1px solid var(--line); border-radius:4px; padding:11px 12px;}
+  .wprog-head{display:flex; justify-content:space-between; align-items:baseline; font-family:'Barlow Condensed'; font-weight:600; text-transform:uppercase; letter-spacing:.5px; font-size:11px; color:var(--grey);}
+  .wprog-head b{font-family:'Anton'; font-size:20px; color:var(--bone); letter-spacing:0;}
+  .wprog-goal b{color:var(--red);}
+  .wbar{height:9px; background:var(--panel2); border-radius:5px; overflow:hidden; margin:9px 0 6px;}
+  .wbar-fill{height:100%; background:linear-gradient(90deg,var(--red-dim),var(--red)); border-radius:5px; transition:width .4s ease;}
+  .wprog-foot{font-size:11.5px; color:var(--grey); font-weight:500;}
+  .wprog-eta{font-size:12px; color:var(--bone); font-weight:600; margin-top:7px; padding-top:7px; border-top:1px solid var(--line); line-height:1.4;}
+  .rulesbox{background:var(--panel); border:1px solid var(--line); border-radius:4px; padding:14px; margin-top:12px;}
+  .rules-h{font-family:'Barlow Condensed'; font-weight:700; text-transform:uppercase; letter-spacing:1px; font-size:14px; color:var(--red); margin-bottom:10px; display:flex; align-items:center; gap:8px;}
+  .rules-h:before{content:""; width:10px; height:10px; background:var(--red); display:inline-block; transform:rotate(45deg);}
+  .rule{font-size:13px; line-height:1.5; color:var(--grey); padding:8px 0; border-top:1px solid var(--line);}
+  .rule:first-of-type{border-top:none; padding-top:0;}
+  .rule b{color:var(--bone);}
   .pform{margin-top:12px;}
   .pf-row{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:9px;}
   .pf-row label{font-family:'Barlow Condensed'; font-weight:600; text-transform:uppercase; letter-spacing:.5px; font-size:12px; color:var(--grey); flex:1;}
@@ -671,6 +685,10 @@ const GENERAL = [
   "Wer gut schlaeft, hat weniger Heisshunger. Schlechter Schlaf treibt dich zum Zucker.",
   "Bau dir feste Essenszeiten. Ein Koerper mit Rhythmus verdaut besser und blaeht weniger.",
   "Disziplin ist, das Richtige zu tun wenn keiner zuschaut und keiner dich lobt. Genau das baust du hier.",
+  "Die Waage springt durch Wasser, Salz und Vortag – nur der Wochenschnitt zaehlt. Massband und Foto luegen weniger.",
+  "Nach 8 bis 12 Wochen Diaet gehoert eine Woche auf Erhaltungskalorien. Kopf und Stoffwechsel brauchen die Pause.",
+  "Kalorien allein halten keine Muskeln – Krafttraining und Protein tun das. Sonst wirst du nur kleiner, nicht definierter.",
+  "Ein schlechter Waage-Tag ist kein schlechter Fortschritt. Wirf nicht wegen einer Zahl alles hin.",
 ];
 
 let recentGen = [];
@@ -815,7 +833,7 @@ const WEEK = [
   { type:'rest', meals:[  // Sonntag
     {w:'Frühstück', t:'3 Eier + 40 g Haferflocken mit Beeren, oder Magerquark (250 g) mit Obst'},
     {w:'Mittag (kalt)', t:'Magerquark (250 g) + Obst, oder großer Thunfisch-Salat – kein Kochen'},
-    {w:'Abend (frisch)', t:'Von zuhause gekocht: {P} Fleisch/Fisch + {C} + viel Gemüse'},
+    {w:'Abend (frisch)', t:'Von zuhause gekocht: {P} Fleisch/Fisch + {C} Reis/Kartoffeln + viel Gemüse'},
   ]},
   { type:'train', meals:[  // Montag
     {w:'Frühstück', t:'3 Eier + 2 Eiweiß, 60 g Haferflocken, Beeren'},
@@ -832,7 +850,7 @@ const WEEK = [
   { type:'rest', note:'Kraft-Einheit A. Kohlenhydrate heute etwas runter.', meals:[  // Mittwoch
     {w:'Frühstück', t:'3 Eier + 2 Eiweiß, 40 g Haferflocken, Beeren'},
     {w:'Mittag (kalt)', t:'Thunfisch mit Gemüse, oder Magerquark (250 g) + Nüsse – kein Kochen'},
-    {w:'Abend (frisch)', t:'Von zuhause gekocht: {P} Faschiertes mit Linsen + viel Gemüse + {C}'},
+    {w:'Abend (frisch)', t:'Von zuhause gekocht: {P} Faschiertes mit Linsen + {C} Reis + viel Gemüse'},
   ]},
   { type:'train', meals:[  // Donnerstag
     {w:'Frühstück', t:'3 Eier + 60 g Haferflocken mit Beeren'},
@@ -849,7 +867,7 @@ const WEEK = [
   { type:'rest', note:'Kraft-Einheit B. Mehr Gemüse & gute Fette.', meals:[  // Samstag
     {w:'Frühstück', t:'Omelett aus 4 Eiern mit Gemüse'},
     {w:'Mittag (kalt)', t:'Magerquark oder griechischer Joghurt mit Nüssen und Beeren'},
-    {w:'Abend (frisch)', t:'Von zuhause gekocht: {P} Fisch/Rind + viel Gemüse + halbe Avocado + {C}'},
+    {w:'Abend (frisch)', t:'Von zuhause gekocht: {P} Fisch/Rind + {C} Kartoffeln + viel Gemüse + halbe Avocado'},
   ]},
 ];
 const DAYNAMES = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
@@ -857,7 +875,7 @@ const DAYSHORT = ['So','Mo','Di','Mi','Do','Fr','Sa'];
 let essenSel = new Date().getDay();
 
 // ---- Profil & Ziel ----
-let PROFILE = {sex:'m', age:35, height:178, weight:83, days:4, goal:'lose'};
+let PROFILE = {sex:'m', age:35, height:178, weight:83, target:75, start:83, days:4, goal:'lose'};
 let curWeight = PROFILE.weight;
 let showProfileForm = false;
 (async()=>{
@@ -866,19 +884,32 @@ let showProfileForm = false;
 })();
 
 const GOALS = {
-  lose:{label:'Abnehmen', kcal:-500, protein:2.0},
-  hold:{label:'Halten',  kcal:0,    protein:1.8},
-  gain:{label:'Zunehmen', kcal:350,  protein:2.0},
+  lose:{label:'Abnehmen', protein:2.0},
+  hold:{label:'Halten',  protein:1.8},
+  gain:{label:'Zunehmen', protein:2.0},
 };
 function actFactor(days){ if(days<=1) return 1.35; if(days<=3) return 1.5; if(days<=5) return 1.6; return 1.75; }
+const clamp=(x,lo,hi)=>Math.max(lo,Math.min(hi,x));
 
 function computeTargets(p, wt){
   const w = wt || p.weight;
   const bmr = 10*w + 6.25*p.height - 5*p.age + (p.sex==='m'?5:-161);
   const tdee = bmr * actFactor(p.days);
+  let kcal = tdee;
+  if(p.goal==='lose'){
+    // Ziel-Abnahme ~0,55 % des Körpergewichts pro Woche -> tägliches Defizit
+    let dailyDef = 0.0055 * w * 1100;              // = 6,05 * kg
+    dailyDef = clamp(dailyDef, 300, 0.30*tdee);    // nicht extremer als 30 % des Verbrauchs
+    kcal = tdee - dailyDef;
+    const floor = Math.max(bmr*1.2, p.sex==='m'?1500:1200);
+    kcal = Math.max(kcal, floor);
+  } else if(p.goal==='gain'){
+    // Ziel-Zunahme ~0,3 % des Körpergewichts pro Woche -> täglicher Überschuss
+    let dailySur = 0.003 * w * 1100;               // = 3,3 * kg
+    dailySur = clamp(dailySur, 250, 500);
+    kcal = tdee + dailySur;
+  }
   const g = GOALS[p.goal] || GOALS.lose;
-  let kcal = tdee + g.kcal;
-  if(p.goal==='lose'){ const floor = Math.max(bmr*1.2, p.sex==='m'?1500:1200); kcal = Math.max(kcal, floor); }
   const protein = Math.round(w * g.protein);
   const fat = Math.round(kcal*0.25/9);
   let carbs = Math.round((kcal - protein*4 - fat*9)/4); if(carbs<50) carbs=50;
@@ -904,7 +935,8 @@ function profileFormHTML(){
    + '<div class="pf-row"><label>Geschlecht</label>'+sel('pf-sex',PROFILE.sex,[['m','Mann'],['w','Frau']])+'</div>'
    + '<div class="pf-row"><label>Alter</label><input id="pf-age" type="number" inputmode="numeric" value="'+PROFILE.age+'"></div>'
    + '<div class="pf-row"><label>Größe (cm)</label><input id="pf-height" type="number" inputmode="numeric" value="'+PROFILE.height+'"></div>'
-   + '<div class="pf-row"><label>Gewicht (kg)</label><input id="pf-weight" type="number" inputmode="decimal" step="0.1" value="'+PROFILE.weight+'"></div>'
+   + '<div class="pf-row"><label>Aktuelles Gewicht (kg)</label><input id="pf-weight" type="number" inputmode="decimal" step="0.1" value="'+PROFILE.weight+'"></div>'
+   + '<div class="pf-row"><label>Zielgewicht (kg)</label><input id="pf-target" type="number" inputmode="decimal" step="0.1" value="'+(PROFILE.target!=null?PROFILE.target:'')+'"></div>'
    + '<div class="pf-row"><label>Training / Woche</label>'+sel('pf-days',PROFILE.days,[[0,'0–1'],[2,'2–3'],[4,'4–5'],[6,'6–7']])+'</div>'
    + '<div class="pf-row"><label>Ziel</label>'+sel('pf-goal',PROFILE.goal,[['lose','Abnehmen'],['hold','Halten'],['gain','Zunehmen']])+'</div>'
    + '<button class="save" onclick="saveProfile()">Profil speichern</button>'
@@ -912,14 +944,20 @@ function profileFormHTML(){
 }
 function saveProfile(){
   const gv=id=>document.getElementById(id).value;
+  const tv=parseFloat(gv('pf-target'));
+  const prevStart = PROFILE.start;
   PROFILE = {
     sex: gv('pf-sex'),
     age: Math.max(14, parseInt(gv('pf-age'))||35),
     height: Math.max(120, parseInt(gv('pf-height'))||178),
     weight: Math.max(35, parseFloat(gv('pf-weight'))||83),
+    target: isNaN(tv)?null:tv,
     days: parseInt(gv('pf-days'))||0,
-    goal: gv('pf-goal')
+    goal: gv('pf-goal'),
+    start: prevStart // Startgewicht bleibt als Referenz für den Fortschritt
   };
+  // Startgewicht setzen, falls noch keins da ist
+  if(PROFILE.start==null) PROFILE.start = PROFILE.weight;
   curWeight = PROFILE.weight;
   try{ window.storage.set("ft:profile", JSON.stringify(PROFILE), false); }catch(e){}
   showProfileForm=false;
@@ -933,7 +971,11 @@ function renderEssen(s){
   const d = WEEK[s];
   const t = computeTargets(PROFILE, curWeight);
   const g = GOALS[PROFILE.goal] || GOALS.lose;
-  const pr = portions(PROFILE.goal);
+  // Portionen in Gramm, skaliert an den berechneten Makros (Referenz: 166 g Protein / 272 g KH)
+  const r10 = (x)=>Math.max(10, Math.round(x/10)*10);
+  const pDin = r10(180 * t.protein/166);   // Fleisch/Fisch am Abend
+  const cDin = r10(200 * t.carbs/272);     // Reis/Kartoffeln am Abend
+  const qG   = r10(250 * t.protein/166);   // Magerquark-Portion
 
   let html = '<div class="daypills">';
   for(let i=1;i<=7;i++){ const idx=i%7; html += '<button class="'+(idx===s?'on':'')+'" onclick="renderEssen('+idx+')">'+DAYSHORT[idx]+'</button>'; }
@@ -946,9 +988,49 @@ function renderEssen(s){
   if(showProfileForm){
     html += profileFormHTML();
   } else {
+    // Aktuell -> Ziel Fortschritt
+    if(PROFILE.target!=null){
+      const cur = t.w;
+      const start = PROFILE.weight; // eingetragenes Gewicht = Startpunkt
+      const tgt = PROFILE.target;
+      const remaining = Math.abs(cur - tgt);
+      let pct;
+      const totalSpan = Math.abs(start - tgt);
+      if(totalSpan < 0.1){ pct = 100; }
+      else { pct = Math.round((totalSpan - Math.abs(cur - tgt)) / totalSpan * 100); }
+      if(pct<0) pct=0; if(pct>100) pct=100;
+      const reachedTxt = remaining < 0.3 ? 'Ziel erreicht! Stark.' : 'noch '+remaining.toFixed(1)+' kg';
+
+      // Zeit bis zum Ziel (Schätzung, ~7700 kcal pro kg)
+      let etaTxt = '';
+      if(remaining >= 0.3){
+        const dailyBal = t.kcal - t.tdee;      // <0 = Defizit
+        const weeklyKg = dailyBal*7/7700;      // <0 = Abnahme
+        const change = tgt - cur;              // <0 = muss abnehmen
+        if(Math.abs(weeklyKg) < 0.03){
+          etaTxt = 'Im Erhalt – für ein Zieldatum wähle Abnehmen oder Zunehmen.';
+        } else if((weeklyKg<0)===(change<0)){
+          const weeks = Math.abs(change)/Math.abs(weeklyKg);
+          const rate = Math.abs(weeklyKg).toFixed(2).replace('.',',');
+          const dt = new Date(); dt.setDate(dt.getDate()+Math.round(weeks*7));
+          const dstr = dt.toLocaleDateString('de-AT',{month:'long', year:'numeric'});
+          const dur = weeks<1.5 ? 'ca. 1 Woche' : (weeks<9 ? 'ca. '+Math.round(weeks)+' Wochen' : 'ca. '+Math.round(weeks/4.345)+' Monate');
+          etaTxt = '⏱ '+dur+' bis zum Ziel · ~'+rate+' kg/Woche · voraussichtlich '+dstr;
+        } else {
+          etaTxt = 'Ziel und Kalorien passen nicht zusammen – prüf dein Ziel im Profil.';
+        }
+      }
+
+      html += '<div class="wprog">'
+            + '<div class="wprog-head"><span><b>'+cur.toFixed(1)+'</b> kg aktuell</span><span class="wprog-goal">Ziel <b>'+tgt.toFixed(1)+'</b> kg</span></div>'
+            + '<div class="wbar"><div class="wbar-fill" style="width:'+pct+'%"></div></div>'
+            + '<div class="wprog-foot">'+reachedTxt+' · '+pct+'% des Wegs geschafft</div>'
+            + (etaTxt ? '<div class="wprog-eta">'+etaTxt+'</div>' : '')
+            + '</div>';
+    }
     html += '<div class="gp-cal">'+t.kcal+' <span>kcal / Tag</span></div>'
           + '<div class="gp-macros"><span><b>'+t.protein+' g</b>Protein</span><span><b>'+t.fat+' g</b>Fett</span><span><b>'+t.carbs+' g</b>KH</span></div>'
-          + '<div class="gp-note">berechnet für '+t.w+' kg · '+PROFILE.days+ (PROFILE.days>=6?'–7':'') +'× Training/Woche. Wieg dich weiter – das Ziel passt sich deinem aktuellen Gewicht an.</div>'
+          + '<div class="gp-note">berechnet für '+t.w+' kg · '+PROFILE.days+ (PROFILE.days>=6?'–7':'') +'× Training/Woche. Die Gramm-Portionen unten sind auf deine Werte berechnet und wachsen/schrumpfen mit deinem Gewicht.</div>'
           + '<div class="supp-mini"><b>Supplemente:</b> '+suppLine(PROFILE.goal)+'</div>';
   }
   html += '</div>';
@@ -956,9 +1038,19 @@ function renderEssen(s){
   // Tag
   html += '<div class="dayhdr"><span class="dname">'+DAYNAMES[s]+'</span><span class="dtype '+(d.type==='train'?'train':'rest')+'">'+(d.type==='train'?'Trainingstag':'Ruhetag')+'</span></div>';
   if(d.note) html += '<div class="supp-mini"><b>'+d.note+'</b></div>';
-  let meals = d.meals.map(m=>({w:m.w, t:m.t.replace('{P}',pr.P).replace('{C}',pr.C)}));
+  let meals = d.meals.map(m=>({w:m.w, t:m.t
+     .replace('{P}', pDin+' g')
+     .replace('{C}', cDin+' g')
+     .replace(/Magerquark \(250 g\)/g, 'Magerquark ('+qG+' g)')
+  }));
   if(PROFILE.goal==='gain') meals.push({w:'Snack', t:'Whey-Shake mit Banane + Haferflocken, oder Handvoll Nüsse + Trockenobst – für den Kalorienüberschuss'});
   html += meals.map(m=>'<div class="meal"><span class="when">'+m.w+'</span><span class="what">'+m.t+'</span></div>').join('');
+  html += '<div class="rulesbox">'
+        + '<div class="rules-h">Wichtig zu wissen</div>'
+        + '<div class="rule"><b>Die Waage lügt kurzfristig.</b> Wasser, Salz, viel Essen am Vortag, bei Frauen der Zyklus – das Gewicht springt ohne Fettänderung. Nur der Wochenschnitt zählt. Maßband am Bauch und ein Foto alle 2 Wochen sagen mehr als eine einzelne Zahl.</div>'
+        + '<div class="rule"><b>Bei langer Diät Pausen machen.</b> Niemand bleibt monatelang am Stück im Defizit. Nach 8–12 Wochen ein bis zwei Wochen auf Erhaltungskalorien essen, dann weiter. Kopf und Stoffwechsel brauchen den Reset.</div>'
+        + '<div class="rule"><b>Muskeln schützt du aktiv.</b> Die Zahlen allein reichen nicht – nur wenn du wirklich Kraft trainierst (2×/Woche) und dein Protein triffst, verlierst du Fett statt Muskel. Sonst wirst du nur kleiner und schwächer.</div>'
+        + '</div>';
   document.getElementById('view-essen').innerHTML = html;
 }
 renderEssen(essenSel);
