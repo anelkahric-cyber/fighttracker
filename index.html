@@ -105,6 +105,9 @@
   #view-training{display:none;}
 
   /* training */
+  .tmode{display:flex; gap:6px; margin:14px 0 4px;}
+  .tmode button{flex:1; background:var(--panel); border:1px solid var(--line); color:var(--grey); font-family:'Barlow Condensed'; font-weight:700; text-transform:uppercase; letter-spacing:1px; font-size:14px; padding:11px; border-radius:4px; cursor:pointer;}
+  .tmode button.on{background:var(--red); border-color:var(--red); color:#fff;}
   .block-title{font-family:'Anton'; text-transform:uppercase; font-size:19px; letter-spacing:.5px; margin:16px 0 3px;}
   .block-title span{color:var(--red);}
   .block-sub{font-size:12px; color:var(--grey); margin-bottom:8px; font-weight:500;}
@@ -132,6 +135,8 @@
   .meal .when{font-family:'Barlow Condensed'; font-weight:700; text-transform:uppercase; letter-spacing:.5px; font-size:11px; color:var(--red); width:66px; flex:0 0 66px; padding-top:2px;}
   .meal .what{font-size:14px; line-height:1.45;}
   .meal .what b{font-weight:600;}
+  .malt{margin:8px 0 6px; font-family:'Barlow Condensed'; font-weight:700; text-transform:uppercase; letter-spacing:1px; font-size:11px; color:var(--grey); position:relative;}
+  .mmac{margin-top:5px; font-family:'Barlow Condensed'; font-weight:600; letter-spacing:.3px; font-size:11.5px; color:var(--red);}
   .cookday{background:var(--red-dim); border:1px solid var(--red); border-radius:4px; padding:10px 13px; font-size:13px; line-height:1.45; margin-bottom:8px;}
   .cookday b{color:#fff;}
   .supp-mini{background:var(--panel2); border:1px solid var(--line); border-radius:4px; padding:10px 13px; font-size:12.5px; line-height:1.5; color:var(--grey); margin-top:8px;}
@@ -888,6 +893,35 @@ const EXTRAS = [
   {n:'Mobility: Hüfte / Sprunggelenk / BWS', s:'10 Min nach jeder Einheit', c:'Genau hier hängt deine Beweglichkeit. 90/90 Hüfte, Ankle Rocks, BWS-Rotation.', q:'Hüft Mobility Kampfsport Routine'},
 ];
 
+const HOME_WORKOUTS = [
+  { title:'Zuhause A', accent:'Kraft & Ganzkörper · ohne Geräte',
+    ex:[
+      {n:'Liegestütze', s:'4 × so viele wie möglich (−2)', c:'Brust, Schultern, Trizeps. Körper bleibt gerade wie ein Brett. Zu leicht? Füße erhöhen.', q:'Liegestütze saubere Technik'},
+      {n:'Kniebeugen (Körpergewicht)', s:'4 × 20', c:'Tief runter, Fersen am Boden. Zu leicht? Einbeinig an der Wand abstützen.', q:'Kniebeuge Körpergewicht Technik'},
+      {n:'Ausfallschritte', s:'3 × 12 je Bein', c:'Für Beinkraft und Balance – zahlt direkt auf Kicks ein.', q:'Ausfallschritte Lunges Technik'},
+      {n:'Pike Push-ups', s:'3 × 8–10', c:'Hüfte hoch, Kopf Richtung Boden – trainiert die Schultern wie Schulterdrücken.', q:'Pike Push Up Technik'},
+      {n:'Rudern unterm Tisch / Handtuch-Rudern', s:'3 × max', c:'Rücken. Unter stabilen Tisch legen und hochziehen, oder Handtuch um Türklinke.', q:'Australian Pull Up Tisch Rudern'},
+      {n:'Plank + Hollow Hold', s:'3 × 30–45 Sek', c:'Rumpf-Stabilität für harte Schläge und Clinch.', q:'Plank Hollow Hold Technik'},
+    ]},
+  { title:'Zuhause B', accent:'Explosiv & Kondition · Fighter-Style',
+    ex:[
+      {n:'Burpees', s:'4 × 8–10', c:'Ganzkörper-Explosivität und Kondition in einem. Sauber, kein Hohlkreuz.', q:'Burpee saubere Technik'},
+      {n:'Sprung-Kniebeugen', s:'4 × 10', c:'Reine Schnellkraft für die Beine – deine Geschwindigkeit im Ring.', q:'Jump Squat Technik'},
+      {n:'Mountain Climbers', s:'4 × 30 Sek', c:'Kondition und Rumpf. Tempo hochhalten, Hüfte tief.', q:'Mountain Climbers Technik'},
+      {n:'Schattenboxen', s:'3 × 3 Min', c:'Technik, Kondition und Kopf. Volle Kombos, Bewegung im Raum, nicht stehen bleiben.', q:'Schattenboxen Anfänger Muay Thai'},
+      {n:'Dips am Stuhl', s:'3 × 10–12', c:'Trizeps und Brust. Zwei stabile Stühle oder Sofakante.', q:'Trizeps Dips Stuhl Technik'},
+      {n:'Beinheben / Russian Twists', s:'3 × 15', c:'Bauch und Rotation – überträgt Kraft in Schlag und Knie.', q:'Beinheben Russian Twist Technik'},
+    ]},
+];
+const HOME_EXTRAS = [
+  {n:'Seilspringen (falls vorhanden)', s:'3–5 × 2–3 Min', c:'Beste Kondition und Fußarbeit fürs Kampfsport-Zuhausetraining.', q:'Seilspringen Technik Anfänger'},
+  {n:'Nacken (gegen Hand-Widerstand)', s:'2–3× / Woche kurz', c:'Schützt bei Treffern. Mit der eigenen Hand sanft Widerstand geben.', q:'Nackentraining zuhause ohne Geräte'},
+  {n:'Mobility: Hüfte / Sprunggelenk / BWS', s:'10 Min nach jeder Einheit', c:'Hält dich beweglich für hohe, schnelle Kicks.', q:'Hüft Mobility Routine zuhause'},
+];
+
+let trainMode = 'gym';
+function setTrainMode(m){ trainMode=m; renderTraining(); }
+
 function ytLink(q){ return 'https://www.youtube.com/results?search_query='+encodeURIComponent(q+' deutsch'); }
 
 function exCard(e){
@@ -897,16 +931,24 @@ function exCard(e){
 }
 
 function renderTraining(){
+  const home = trainMode==='home';
+  const workouts = home?HOME_WORKOUTS:WORKOUTS;
+  const extras = home?HOME_EXTRAS:EXTRAS;
   let html='';
-  WORKOUTS.forEach(w=>{
+  html += '<div class="tmode">'
+        + '<button class="'+(!home?'on':'')+'" onclick="setTrainMode(\'gym\')">Im Gym</button>'
+        + '<button class="'+(home?'on':'')+'" onclick="setTrainMode(\'home\')">Zuhause</button>'
+        + '</div>';
+  workouts.forEach(w=>{
     html += '<div class="block-title">'+w.title.replace(/(A|B)$/,'<span>$1</span>')+'</div>';
     html += '<div class="block-sub">'+w.accent+'</div>';
     html += w.ex.map(exCard).join('');
   });
   html += '<div class="block-title">Extras <span>·</span> oft vergessen</div>';
   html += '<div class="block-sub">Die kleinen Dinge, die Kämpfer stärker & robuster machen</div>';
-  html += EXTRAS.map(exCard).join('');
-  html += '<div class="note-box"><b>Im Defizit gilt:</b> nicht bis zum Versagen, keine Muskelkater-Jagd. Immer 2–3 Wiederholungen im Tank lassen. Du trainierst für Power & Muskelerhalt – die Regeneration fürs Muay Thai hat Vorrang. Sonntag ist Ruhetag.</div>';
+  html += extras.map(exCard).join('');
+  const homeNote = home ? 'Kein Gym nötig – zweimal die Woche reicht, um im Defizit die Muskeln zu halten. Steigere die Wiederholungen, wenn es zu leicht wird.' : 'nicht bis zum Versagen, keine Muskelkater-Jagd. Immer 2–3 Wiederholungen im Tank lassen. Du trainierst für Power & Muskelerhalt – die Regeneration fürs Muay Thai hat Vorrang.';
+  html += '<div class="note-box"><b>Im Defizit gilt:</b> '+homeNote+' Sonntag ist Ruhetag.</div>';
   document.getElementById('view-training').innerHTML=html;
 }
 renderTraining();
@@ -923,44 +965,85 @@ function switchView(v){
 // ---- Essen view (Wochenplan, zeigt automatisch heute) ----
 // index nach Wochentag: 0=So ... 6=Sa
 const WEEK = [
-  { type:'rest', meals:[  // Sonntag
-    {w:'Frühstück', t:'3 Eier + 40 g Haferflocken mit Beeren, oder Magerquark (250 g) mit Obst'},
-    {w:'Mittag (kalt)', t:'Magerquark (250 g) + Obst, oder großer Thunfisch-Salat – kein Kochen'},
-    {w:'Abend (frisch)', t:'Von zuhause gekocht: {P} Fleisch/Fisch + {C} Reis/Kartoffeln + viel Gemüse'},
+  { type:'rest', meals:[
+    {w:'Frühstück', comp:[['egg',150,1],['oats',60,2],['berries',80,0]]},
+    {w:'Mittag (kalt)', post:'kein Kochen', comp:[['quark',250,1],['bread',50,2],['berries',80,0]], alt:[['egg',150,1],['bread',60,2],['veg',150,0]]},
+    {w:'Abend (frisch)', pre:'Von zuhause gekocht: ', comp:[['chicken',180,1],['potato',200,2],['veg',200,0]]},
   ]},
-  { type:'train', meals:[  // Montag
-    {w:'Frühstück', t:'3 Eier + 2 Eiweiß, 60 g Haferflocken, Beeren'},
-    {w:'Mittag (kalt)', t:'Magerquark (250 g) + Banane, oder Thunfisch-Salat – kein Kochen'},
-    {w:'Vor Training', t:'1 Banane + Kaffee'},
-    {w:'Abend (frisch)', t:'Von zuhause gekocht: {P} Hühnchen + {C} Reis + Gemüse'},
+  { type:'train', meals:[
+    {w:'Frühstück', comp:[['egg',150,1],['white',66,1],['oats',70,2],['berries',80,0]]},
+    {w:'Mittag (kalt)', post:'kein Kochen', comp:[['quark',250,1],['bread',60,2]], alt:[['tuna',120,1],['bread',70,2]]},
+    {w:'Vor Training', post:'Kaffee', comp:[['banana',120,2]]},
+    {w:'Abend (frisch)', pre:'Von zuhause gekocht: ', comp:[['chicken',180,1],['rice',180,2],['veg',200,0]]},
   ]},
-  { type:'train', meals:[  // Dienstag
-    {w:'Frühstück', t:'Rührei aus 3 Eiern mit Vollkornbrot, oder Magerquark (250 g) mit Banane und Nüssen'},
-    {w:'Mittag (kalt)', t:'Griechischer Joghurt + Nüsse + Obst, oder Vollkornbrot mit Ei/Thunfisch'},
-    {w:'Vor Training', t:'1 Banane + Kaffee'},
-    {w:'Abend (frisch)', t:'Von zuhause gekocht: {P} Pute/Rind + {C} Kartoffeln + Gemüse'},
+  { type:'train', meals:[
+    {w:'Frühstück', comp:[['egg',150,1],['oats',60,2],['banana',120,2]]},
+    {w:'Mittag (kalt)', post:'kein Kochen', comp:[['yog',200,1],['bread',50,2],['nuts',25,0]], alt:[['quark',250,1],['banana',120,2]]},
+    {w:'Vor Training', post:'Kaffee', comp:[['banana',120,2]]},
+    {w:'Abend (frisch)', pre:'Von zuhause gekocht: ', comp:[['turkey',180,1],['potato',220,2],['veg',200,0]]},
   ]},
-  { type:'rest', note:'Kraft-Einheit A. Kohlenhydrate heute etwas runter.', meals:[  // Mittwoch
-    {w:'Frühstück', t:'3 Eier + 2 Eiweiß, 40 g Haferflocken, Beeren'},
-    {w:'Mittag (kalt)', t:'Thunfisch mit Gemüse, oder Magerquark (250 g) + Nüsse – kein Kochen'},
-    {w:'Abend (frisch)', t:'Von zuhause gekocht: {P} Faschiertes mit Linsen + {C} Reis + viel Gemüse'},
+  { type:'rest', note:'Kraft-Einheit A. Etwas weniger Kohlenhydrate.', meals:[
+    {w:'Frühstück', comp:[['egg',150,1],['oats',50,2],['berries',80,0]]},
+    {w:'Mittag (kalt)', post:'kein Kochen', comp:[['tuna',120,1],['bread',50,2],['veg',150,0]], alt:[['quark',250,1],['bread',50,2],['veg',100,0]]},
+    {w:'Abend (frisch)', pre:'Von zuhause gekocht: ', comp:[['mince',150,1],['lentils',120,1],['rice',120,2],['veg',200,0]]},
   ]},
-  { type:'train', meals:[  // Donnerstag
-    {w:'Frühstück', t:'3 Eier + 60 g Haferflocken mit Beeren'},
-    {w:'Mittag (kalt)', t:'Magerquark (250 g) + Banane, oder Thunfisch-Salat'},
-    {w:'Vor Training', t:'1 Banane + Kaffee'},
-    {w:'Abend (frisch)', t:'Von zuhause gekocht: {P} Lachs/Fisch + {C} Reis + Gemüse'},
+  { type:'train', meals:[
+    {w:'Frühstück', comp:[['egg',150,1],['oats',70,2],['berries',80,0]]},
+    {w:'Mittag (kalt)', post:'kein Kochen', comp:[['quark',250,1],['bread',60,2]], alt:[['yog',200,1],['bread',60,2],['berries',80,0]]},
+    {w:'Vor Training', post:'Kaffee', comp:[['banana',120,2]]},
+    {w:'Abend (frisch)', pre:'Von zuhause gekocht: ', comp:[['salmon',170,1],['rice',180,2],['veg',200,0]]},
   ]},
-  { type:'train', meals:[  // Freitag
-    {w:'Frühstück', t:'Omelett aus 3 Eiern mit Gemüse, oder Magerquark (250 g) mit Banane und Nüssen'},
-    {w:'Mittag (kalt)', t:'Vollkornbrot mit Ei/Thunfisch, oder Joghurt + Nüsse'},
-    {w:'Vor Training', t:'1 Banane + Kaffee'},
-    {w:'Abend (frisch)', t:'Von zuhause gekocht: {P} Hühnchen/Rind + {C} Kartoffeln oder Reis + Gemüse'},
+  { type:'train', meals:[
+    {w:'Frühstück', comp:[['egg',150,1],['oats',60,2],['banana',120,2]]},
+    {w:'Mittag (kalt)', post:'kein Kochen', comp:[['tuna',100,1],['bread',80,2]], alt:[['quark',250,1],['bread',70,2]]},
+    {w:'Vor Training', post:'Kaffee', comp:[['banana',120,2]]},
+    {w:'Abend (frisch)', pre:'Von zuhause gekocht: ', comp:[['chicken',180,1],['rice',180,2],['veg',200,0]]},
   ]},
-  { type:'rest', note:'Kraft-Einheit B. Mehr Gemüse & gute Fette.', meals:[  // Samstag
-    {w:'Frühstück', t:'Omelett aus 4 Eiern mit Gemüse'},
-    {w:'Mittag (kalt)', t:'Magerquark oder griechischer Joghurt mit Nüssen und Beeren'},
-    {w:'Abend (frisch)', t:'Von zuhause gekocht: {P} Fisch/Rind + {C} Kartoffeln + viel Gemüse + halbe Avocado'},
+  { type:'rest', note:'Kraft-Einheit B. Mehr Gemüse & gute Fette.', meals:[
+    {w:'Frühstück', comp:[['egg',200,1],['oats',40,2],['veg',80,0]]},
+    {w:'Mittag (kalt)', post:'kein Kochen', comp:[['quark',250,1],['nuts',25,0],['berries',80,0]], alt:[['egg',150,1],['bread',50,2],['veg',80,0]]},
+    {w:'Abend (frisch)', pre:'Von zuhause gekocht: ', comp:[['salmon',170,1],['potato',150,2],['avocado',100,0],['veg',250,0]]},
+  ]},
+];
+const WEEK_VEG = [
+  { type:'rest', meals:[
+    {w:'Frühstück', comp:[['egg',150,1],['oats',60,2],['berries',80,0]]},
+    {w:'Mittag (kalt)', post:'kein Kochen', comp:[['quark',250,1],['bread',50,2],['berries',80,0]], alt:[['egg',150,1],['bread',60,2],['veg',150,0]]},
+    {w:'Abend (frisch)', pre:'Von zuhause gekocht: ', comp:[['tofu',220,1],['potato',200,2],['veg',200,0]]},
+  ]},
+  { type:'train', meals:[
+    {w:'Frühstück', comp:[['egg',120,1],['white',99,1],['oats',70,2],['berries',80,0]]},
+    {w:'Mittag (kalt)', post:'kein Kochen', comp:[['quark',250,1],['bread',60,2]], alt:[['yog',200,1],['bread',60,2],['berries',80,0]]},
+    {w:'Vor Training', post:'Kaffee', comp:[['banana',120,2]]},
+    {w:'Abend (frisch)', pre:'Von zuhause gekocht: ', comp:[['tofu',220,1],['rice',180,2],['veg',200,0]]},
+  ]},
+  { type:'train', meals:[
+    {w:'Frühstück', comp:[['egg',120,1],['white',66,1],['oats',60,2],['banana',120,2]]},
+    {w:'Mittag (kalt)', post:'kein Kochen', comp:[['quark',250,1],['bread',50,2]], alt:[['egg',150,1],['bread',60,2],['veg',150,0]]},
+    {w:'Vor Training', post:'Kaffee', comp:[['banana',120,2]]},
+    {w:'Abend (frisch)', pre:'Von zuhause gekocht: ', comp:[['lentils',220,1],['rice',200,2],['veg',200,0]]},
+  ]},
+  { type:'rest', note:'Kraft-Einheit A. Etwas weniger Kohlenhydrate.', meals:[
+    {w:'Frühstück', comp:[['egg',120,1],['white',66,1],['oats',50,2]]},
+    {w:'Mittag (kalt)', post:'kein Kochen', comp:[['quark',250,1],['bread',50,2]], alt:[['yog',200,1],['bread',50,2],['berries',80,0]]},
+    {w:'Abend (frisch)', pre:'Von zuhause gekocht: ', comp:[['chickpeas',180,1],['tofu',120,1],['rice',120,2],['veg',200,0]]},
+  ]},
+  { type:'train', meals:[
+    {w:'Frühstück', comp:[['egg',120,1],['white',66,1],['oats',70,2],['berries',80,0]]},
+    {w:'Mittag (kalt)', post:'kein Kochen', comp:[['quark',250,1],['bread',60,2]], alt:[['egg',150,1],['bread',70,2],['veg',100,0]]},
+    {w:'Vor Training', post:'Kaffee', comp:[['banana',120,2]]},
+    {w:'Abend (frisch)', pre:'Von zuhause gekocht: ', comp:[['tofu',220,1],['rice',180,2],['veg',200,0]]},
+  ]},
+  { type:'train', meals:[
+    {w:'Frühstück', comp:[['egg',150,1],['oats',60,2],['banana',120,2]]},
+    {w:'Mittag (kalt)', post:'kein Kochen', comp:[['quark',250,1],['bread',70,2]], alt:[['yog',200,1],['bread',70,2],['berries',80,0]]},
+    {w:'Vor Training', post:'Kaffee', comp:[['banana',120,2]]},
+    {w:'Abend (frisch)', pre:'Von zuhause gekocht: ', comp:[['lentils',200,1],['chickpeas',100,1],['potato',200,2],['veg',200,0]]},
+  ]},
+  { type:'rest', note:'Kraft-Einheit B. Mehr Gemüse & gute Fette.', meals:[
+    {w:'Frühstück', comp:[['egg',150,1],['white',66,1],['oats',40,2]]},
+    {w:'Mittag (kalt)', post:'kein Kochen', comp:[['quark',250,1],['berries',80,0]], alt:[['egg',150,1],['bread',50,2],['veg',80,0]]},
+    {w:'Abend (frisch)', pre:'Von zuhause gekocht: ', comp:[['tofu',200,1],['lentils',100,1],['potato',150,2],['avocado',100,0],['veg',250,0]]},
   ]},
 ];
 const DAYNAMES = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
@@ -968,7 +1051,7 @@ const DAYSHORT = ['So','Mo','Di','Mi','Do','Fr','Sa'];
 let essenSel = new Date().getDay();
 
 // ---- Profil & Ziel ----
-let PROFILE = {sex:'m', age:35, height:178, weight:83, target:75, start:83, days:4, goal:'lose'};
+let PROFILE = {sex:'m', age:35, height:178, weight:83, target:75, start:83, days:4, goal:'lose', diet:'omni', shake:0};
 let curWeight = PROFILE.weight;
 let showProfileForm = false;
 (async()=>{
@@ -1004,7 +1087,7 @@ function computeTargets(p, wt){
   }
   const g = GOALS[p.goal] || GOALS.lose;
   const protein = Math.round(w * g.protein);
-  const fat = Math.round(kcal*0.25/9);
+  const fat = Math.round(kcal*0.30/9);
   let carbs = Math.round((kcal - protein*4 - fat*9)/4); if(carbs<50) carbs=50;
   return {kcal:Math.round(kcal), protein, fat, carbs, tdee:Math.round(tdee), goal:p.goal, w};
 }
@@ -1032,6 +1115,8 @@ function profileFormHTML(){
    + '<div class="pf-row"><label>Zielgewicht (kg)</label><input id="pf-target" type="number" inputmode="decimal" step="0.1" value="'+(PROFILE.target!=null?PROFILE.target:'')+'"></div>'
    + '<div class="pf-row"><label>Training / Woche</label>'+sel('pf-days',PROFILE.days,[[0,'0–1'],[2,'2–3'],[4,'4–5'],[6,'6–7']])+'</div>'
    + '<div class="pf-row"><label>Ziel</label>'+sel('pf-goal',PROFILE.goal,[['lose','Abnehmen'],['hold','Halten'],['gain','Zunehmen']])+'</div>'
+   + '<div class="pf-row"><label>Ernährung</label>'+sel('pf-diet',PROFILE.diet,[['omni','Alles'],['veg','Vegetarisch']])+'</div>'
+   + '<div class="pf-row"><label>Proteinshake / Tag</label>'+sel('pf-shake',(PROFILE.shake||0),[[0,'keiner'],[1,'1 Shake'],[2,'2 Shakes']])+'</div>'
    + '<button class="save" onclick="saveProfile()">Profil speichern</button>'
    + '</div>';
 }
@@ -1047,6 +1132,8 @@ function saveProfile(){
     target: isNaN(tv)?null:tv,
     days: parseInt(gv('pf-days'))||0,
     goal: gv('pf-goal'),
+    diet: gv('pf-diet'),
+    shake: parseInt(gv('pf-shake'))||0,
     start: prevStart // Startgewicht bleibt als Referenz für den Fortschritt
   };
   // Startgewicht setzen, falls noch keins da ist
@@ -1059,16 +1146,96 @@ function saveProfile(){
 }
 function toggleProfileForm(){ showProfileForm=!showProfileForm; renderEssen(essenSel); }
 
+// ---- Lebensmittel-Nährwerte (pro 100 g, gekocht wo sinnvoll) & Portions-Engine ----
+const FOODS = {
+  egg:{n:'Eier',p:12.6,f:10,c:0.6,u:'egg'},
+  white:{n:'Eiweiß',p:11,f:0.2,c:0.7,u:'white'},
+  oats:{n:'Haferflocken',p:13,f:7,c:60},
+  berries:{n:'Beeren',p:1,f:0,c:12},
+  quark:{n:'Magerquark',p:12,f:0.3,c:4},
+  yog:{n:'griech. Joghurt',p:9,f:5,c:4},
+  tuna:{n:'Thunfisch',p:25,f:1,c:0},
+  bread:{n:'Vollkornbrot',p:9,f:3,c:43},
+  cheese:{n:'Käse',p:25,f:27,c:1},
+  hummus:{n:'Hummus',p:8,f:18,c:15},
+  nuts:{n:'Nüsse',p:15,f:54,c:20},
+  banana:{n:'Banane',p:1.1,f:0.3,c:23,u:'banana'},
+  chicken:{n:'Hühnchen',p:31,f:4,c:0},
+  turkey:{n:'Pute/Rind',p:27,f:8,c:0},
+  mince:{n:'Faschiertes',p:26,f:12,c:0},
+  salmon:{n:'Lachs',p:22,f:13,c:0},
+  rice:{n:'Reis',p:2.7,f:0.3,c:28},
+  potato:{n:'Kartoffeln',p:2,f:0.1,c:17},
+  lentils:{n:'Linsen',p:9,f:0.4,c:17},
+  tofu:{n:'Tofu',p:13,f:8,c:2},
+  tempeh:{n:'Tempeh',p:19,f:11,c:9},
+  chickpeas:{n:'Kichererbsen',p:9,f:2.6,c:27},
+  halloumi:{n:'Halloumi',p:22,f:26,c:2},
+  avocado:{n:'Avocado',p:2,f:15,c:9,u:'half'},
+  veg:{n:'Gemüse',p:2,f:0.3,c:7},
+  whey:{n:'Proteinshake',p:80,f:6,c:8,u:'shake'},
+};
+
+// Skaliert Protein- und Kohlenhydratquellen so, dass die Tagessumme das Ziel trifft.
+function buildDay(day, t, addSnack, shake){
+  const meals = day.meals.map(m=>({w:m.w, pre:m.pre||'', post:m.post||'', comp:m.comp.map(c=>c.slice()), alt:m.alt?m.alt.map(c=>c.slice()):null}));
+  if(addSnack) meals.push({w:'Snack', pre:'', post:'für den Überschuss', comp:[['whey',30,1],['banana',120,2],['oats',40,2]], alt:null});
+  if(shake>0) meals.push({w:'Proteinshake', pre:'', post:'', comp:[['whey',30*shake,0]], alt:null});
+  function roundUnit(k,gg){ const F=FOODS[k];
+    if(F.u==='egg'){ const n=Math.max(1,Math.round(gg/50)); return n*50; }
+    if(F.u==='white'){ const n=Math.max(1,Math.round(gg/33)); return n*33; }
+    if(F.u==='banana'){ const n=Math.max(1,Math.round(gg/120)); return n*120; }
+    if(F.u==='shake'){ const n=Math.max(1,Math.round(gg/30)); return n*30; }
+    if(F.u==='half'){ return 100; }
+    return Math.max(0, Math.round(gg/10)*10);
+  }
+  // iterativ kP (Protein-Anker fl1) und kC (KH-Anker fl2) am Tagesziel ausrichten (nur Hauptgerichte zählen)
+  let kP=1, kC=1;
+  for(let it=0; it<6; it++){
+    let fixedP=0, baseAP=0;
+    meals.forEach(m=>m.comp.forEach(a=>{ const F=FOODS[a[0]];
+      if(a[2]===1) baseAP+=F.p*a[1]/100; else { const g=a[1]*(a[2]===2?kC:1); fixedP+=F.p*g/100; } }));
+    kP = baseAP>0 ? Math.max(0.3, Math.min(3.5,(t.protein-fixedP)/baseAP)) : 1;
+    let fixedC=0, baseAC=0;
+    meals.forEach(m=>m.comp.forEach(a=>{ const F=FOODS[a[0]];
+      if(a[2]===2) baseAC+=F.c*a[1]/100; else { const g=a[1]*(a[2]===1?kP:1); fixedC+=F.c*g/100; } }));
+    kC = baseAC>0 ? Math.max(0.3, Math.min(3.5,(t.carbs-fixedC)/baseAC)) : 1;
+  }
+  function render(comp){ let parts=[],P=0,F=0,C=0;
+    comp.forEach(a=>{ const Fd=FOODS[a[0]], fl=a[2]; let gg=roundUnit(a[0], a[1]*(fl===1?kP:fl===2?kC:1)); let disp;
+      if(Fd.u==='egg'){ const n=Math.round(gg/50); disp=n+' '+(n===1?'Ei':'Eier'); }
+      else if(Fd.u==='white'){ const n=Math.round(gg/33); disp=n+' Eiweiß'; }
+      else if(Fd.u==='banana'){ const n=Math.round(gg/120); disp=n+' Banane'+(n>1?'n':''); }
+      else if(Fd.u==='shake'){ const n=Math.round(gg/30); disp=n+' '+(n===1?'Proteinshake':'Proteinshakes'); }
+      else if(Fd.u==='half'){ disp='halbe '+Fd.n; }
+      else { disp=gg+' g '+Fd.n; }
+      P+=Fd.p*gg/100; F+=Fd.f*gg/100; C+=Fd.c*gg/100; parts.push(disp);
+    });
+    P=Math.round(P); F=Math.round(F); C=Math.round(C);
+    return {text:parts.join(' + '), P, F, C, kc:P*4+C*4+F*9};
+  }
+  const tot={P:0,F:0,C:0,kc:0};
+  const out = meals.map(m=>{ const r=render(m.comp);
+    tot.P+=r.P; tot.F+=r.F; tot.C+=r.C; tot.kc+=r.kc;
+    const o={w:m.w, text:(m.pre||'')+r.text+(m.post?' · '+m.post:''), P:r.P, F:r.F, C:r.C, kc:r.kc};
+    if(m.alt){ const ra=render(m.alt); o.altText=(m.pre||'')+ra.text+(m.post?' · '+m.post:''); o.altP=ra.P; o.altF=ra.F; o.altC=ra.C; o.altkc=ra.kc; }
+    return o;
+  });
+  // Fettlücke füllen (Gerichte sind mager) -> Kalorien treffen das Ziel
+  const fatGap = Math.round(t.fat - tot.F);
+  if(fatGap >= 5){ const kc=fatGap*9;
+    out.push({w:'Fette', text:fatGap+' g Olivenöl / Nüsse – über den Tag zum Kochen & Anrichten', P:0, F:fatGap, C:0, kc:kc});
+    tot.F+=fatGap; tot.kc+=kc;
+  }
+  return {meals:out, tot};
+}
+
 function renderEssen(s){
   essenSel = s;
-  const d = WEEK[s];
+  const veg = PROFILE.diet==='veg';
+  const d = (veg?WEEK_VEG:WEEK)[s];
   const t = computeTargets(PROFILE, curWeight);
   const g = GOALS[PROFILE.goal] || GOALS.lose;
-  // Portionen in Gramm, skaliert an den berechneten Makros (Referenz: 166 g Protein / 272 g KH)
-  const r10 = (x)=>Math.max(10, Math.round(x/10)*10);
-  const pDin = r10(180 * t.protein/166);   // Fleisch/Fisch am Abend
-  const cDin = r10(200 * t.carbs/272);     // Reis/Kartoffeln am Abend
-  const qG   = r10(250 * t.protein/166);   // Magerquark-Portion
 
   let html = '<div class="daypills">';
   for(let i=1;i<=7;i++){ const idx=i%7; html += '<button class="'+(idx===s?'on':'')+'" onclick="renderEssen('+idx+')">'+DAYSHORT[idx]+'</button>'; }
@@ -1131,13 +1298,13 @@ function renderEssen(s){
   // Tag
   html += '<div class="dayhdr"><span class="dname">'+DAYNAMES[s]+'</span><span class="dtype '+(d.type==='train'?'train':'rest')+'">'+(d.type==='train'?'Trainingstag':'Ruhetag')+'</span></div>';
   if(d.note) html += '<div class="supp-mini"><b>'+d.note+'</b></div>';
-  let meals = d.meals.map(m=>({w:m.w, t:m.t
-     .replace('{P}', pDin+' g')
-     .replace('{C}', cDin+' g')
-     .replace(/Magerquark \(250 g\)/g, 'Magerquark ('+qG+' g)')
-  }));
-  if(PROFILE.goal==='gain') meals.push({w:'Snack', t:'Whey-Shake mit Banane + Haferflocken, oder Handvoll Nüsse + Trockenobst – für den Kalorienüberschuss'});
-  html += meals.map(m=>'<div class="meal"><span class="when">'+m.w+'</span><span class="what">'+m.t+'</span></div>').join('');
+  const plan = buildDay(d, t, PROFILE.goal==='gain', PROFILE.shake||0);
+  html += plan.meals.map(m=>{
+    let inner = m.text + '<div class="mmac">≈ '+m.kc+' kcal · P '+m.P+' · F '+m.F+' · KH '+m.C+' g</div>';
+    if(m.altText){ inner += '<div class="malt">oder</div>' + m.altText + '<div class="mmac">≈ '+m.altkc+' kcal · P '+m.altP+' · F '+m.altF+' · KH '+m.altC+' g</div>'; }
+    return '<div class="meal"><span class="when">'+m.w+'</span><span class="what">'+inner+'</span></div>';
+  }).join('');
+  html += '<div class="supp-mini">Portionen &amp; Makros sind aus echten Nährwerten auf dein Tagesziel berechnet. Tagessumme ≈ '+plan.tot.P+' g Protein · '+plan.tot.F+' g Fett · '+plan.tot.C+' g KH · '+plan.tot.kc+' kcal.</div>';
   html += '<div class="rulesbox">'
         + '<div class="rules-h">Wichtig zu wissen</div>'
         + '<div class="rule"><b>Die Waage lügt kurzfristig.</b> Wasser, Salz, viel Essen am Vortag, bei Frauen der Zyklus – das Gewicht springt ohne Fettänderung. Nur der Wochenschnitt zählt. Maßband am Bauch und ein Foto alle 2 Wochen sagen mehr als eine einzelne Zahl.</div>'
