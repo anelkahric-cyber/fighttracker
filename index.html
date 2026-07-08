@@ -215,7 +215,26 @@
   .pf-row label{font-family:'Barlow Condensed'; font-weight:600; text-transform:uppercase; letter-spacing:.5px; font-size:12px; color:var(--grey); flex:1;}
   .pf-row input, .pf-row select{background:var(--ink); border:1px solid var(--line); color:var(--bone); font-family:'Barlow'; font-size:15px; padding:8px 10px; border-radius:4px; width:150px;}
   .pf-row select{cursor:pointer;}
+
+  /* Splash / magic moment */
+  #splash{position:fixed; inset:0; z-index:200; background:radial-gradient(circle at 50% 38%, #1e1e1e, #0c0c0c 70%); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; text-align:center; padding:24px; transition:opacity .45s ease, visibility .45s;}
+  #splash.hide{opacity:0; visibility:hidden;}
+  .sp-logo{font-family:'Anton'; font-size:64px; color:var(--bone); width:118px; height:118px; line-height:118px; border:4px solid var(--red); border-radius:18px; background:#141414; animation:sp-punch .55s cubic-bezier(.2,.9,.3,1.5) both, sp-glow 1.7s ease-out .5s;}
+  @keyframes sp-punch{0%{transform:scale(.2) rotate(-10deg); opacity:0;} 60%{opacity:1;} 100%{transform:scale(1) rotate(0); opacity:1;}}
+  @keyframes sp-glow{0%{box-shadow:0 0 0 0 rgba(193,39,45,.75);} 100%{box-shadow:0 0 46px 10px rgba(193,39,45,0);}}
+  .sp-greet{font-family:'Anton'; text-transform:uppercase; font-size:26px; line-height:1.1; color:var(--bone); opacity:0; animation:sp-up .5s ease .5s both;}
+  .sp-greet span{color:var(--red);}
+  .sp-streak{font-family:'Barlow Condensed'; font-weight:700; text-transform:uppercase; letter-spacing:2px; font-size:15px; color:var(--red); opacity:0; animation:sp-up .5s ease .7s both;}
+  .sp-quote{font-family:'Barlow Condensed'; font-style:italic; font-size:15px; color:var(--grey); max-width:280px; opacity:0; animation:sp-up .5s ease .9s both;}
+  @keyframes sp-up{0%{transform:translateY(12px); opacity:0;} 100%{transform:translateY(0); opacity:1;}}
 </style>
+
+<div id="splash" onclick="hideSplash()">
+  <div class="sp-logo">FT</div>
+  <div class="sp-greet" id="sp-greet">Fight Tracker</div>
+  <div class="sp-streak" id="sp-streak"></div>
+  <div class="sp-quote" id="sp-quote"></div>
+</div>
 
 <div id="app">
   <div class="top">
@@ -1051,13 +1070,40 @@ const DAYSHORT = ['So','Mo','Di','Mi','Do','Fr','Sa'];
 let essenSel = new Date().getDay();
 
 // ---- Profil & Ziel ----
-let PROFILE = {sex:'m', age:35, height:178, weight:83, target:75, start:83, days:4, goal:'lose', diet:'omni', shake:0};
+let PROFILE = {name:'', sex:'m', age:35, height:178, weight:83, target:75, start:83, days:4, goal:'lose', diet:'omni', shake:0};
 let curWeight = PROFILE.weight;
 let showProfileForm = false;
 (async()=>{
   try{ const r=await window.storage.get("ft:profile"); if(r){ PROFILE=Object.assign(PROFILE, JSON.parse(r.value)); curWeight=PROFILE.weight; } else { showProfileForm=true; } }catch(e){}
   if(typeof renderEssen==='function') renderEssen(essenSel);
+  initSplash();
 })();
+
+const SPLASH_QUOTES = [
+  'Disziplin schlägt Talent.','Jeder Tag zählt. Auch heute.','Der Ring belohnt Konstanz.','Steh auf. Deckung hoch. Weiter.',
+  'Kämpfer werden im Training gemacht.','Kleine Schritte, jeden Tag.','Schmerz ist temporär, Stolz bleibt.','Zeig, dass du dranbleibst.'
+];
+let splashTimer=null;
+async function initSplash(){
+  const el=document.getElementById('splash'); if(!el) return;
+  const h=new Date().getHours();
+  const greet = h<11 ? 'Guten Morgen' : (h<17 ? 'Servus' : 'Guten Abend');
+  const name = (PROFILE.name||'').trim();
+  document.getElementById('sp-greet').innerHTML = name ? (greet+', <span>'+name+'</span>') : ('<span>Fight</span> Tracker');
+  document.getElementById('sp-quote').textContent = SPLASH_QUOTES[Math.floor(Math.random()*SPLASH_QUOTES.length)];
+  // Serie berechnen
+  let streak=0;
+  try{
+    const list=await allEntries(); const dates=new Set(list.map(e=>e.date));
+    let cur=new Date(); cur.setHours(0,0,0,0);
+    while(dates.has(iso(cur))){ streak++; cur.setDate(cur.getDate()-1); }
+  }catch(e){}
+  const se=document.getElementById('sp-streak');
+  se.textContent = streak>0 ? ('🔥 Tag '+streak+' deiner Serie') : 'Bereit für Tag 1?';
+  clearTimeout(splashTimer);
+  splashTimer=setTimeout(hideSplash, 2000);
+}
+function hideSplash(){ const el=document.getElementById('splash'); if(el) el.className='hide'; }
 
 const GOALS = {
   lose:{label:'Abnehmen', protein:2.0},
@@ -1108,6 +1154,7 @@ function sel(id,val,opts){ // opts: [[value,label],...]
 }
 function profileFormHTML(){
   return '<div class="pform">'
+   + '<div class="pf-row"><label>Name</label><input id="pf-name" type="text" value="'+(PROFILE.name||'').replace(/"/g,'&quot;')+'" placeholder="dein Name"></div>'
    + '<div class="pf-row"><label>Geschlecht</label>'+sel('pf-sex',PROFILE.sex,[['m','Mann'],['w','Frau']])+'</div>'
    + '<div class="pf-row"><label>Alter</label><input id="pf-age" type="number" inputmode="numeric" value="'+PROFILE.age+'"></div>'
    + '<div class="pf-row"><label>Größe (cm)</label><input id="pf-height" type="number" inputmode="numeric" value="'+PROFILE.height+'"></div>'
@@ -1125,6 +1172,7 @@ function saveProfile(){
   const tv=parseFloat(gv('pf-target'));
   const prevStart = PROFILE.start;
   PROFILE = {
+    name: (gv('pf-name')||'').trim().slice(0,20),
     sex: gv('pf-sex'),
     age: Math.max(14, parseInt(gv('pf-age'))||35),
     height: Math.max(120, parseInt(gv('pf-height'))||178),
