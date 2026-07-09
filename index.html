@@ -493,6 +493,14 @@ if(typeof window.storage === 'undefined' || !window.storage){
   };
 }
 
+// Jede Änderung an ft:-Daten stößt einen gebündelten Upload zu Supabase an (falls eingeloggt)
+try{
+  const _origSet = window.storage.set.bind(window.storage);
+  const _origDel = window.storage.delete.bind(window.storage);
+  window.storage.set = async function(k,v,shared){ const r = await _origSet(k,v,shared); if(String(k).indexOf('ft:')===0 && typeof scheduleUpload==='function') scheduleUpload(); return r; };
+  window.storage.delete = async function(k,shared){ const r = await _origDel(k,shared); if(String(k).indexOf('ft:')===0 && typeof scheduleUpload==='function') scheduleUpload(); return r; };
+}catch(e){}
+
 const KEY = d => "ft:"+d;
 
 // ---- Supabase-Login (Schicht vor der App; App läuft ohne Netz/Backend normal weiter) ----
@@ -532,16 +540,38 @@ async function agSubmit(){
   }catch(e){ if(msg) msg.textContent='Etwas ist schiefgelaufen. Versuch es nochmal.'; }
 }
 function showAuthGate(){ const s=document.getElementById('splash'); if(s) s.style.display='none'; const g=document.getElementById('authgate'); if(g) g.style.display='flex'; agMode('login'); }
-function onLoggedIn(){ const g=document.getElementById('authgate'); if(g) g.style.display='none'; if(!_appStarted){ _appStarted=true; startApp(); } }
-async function logout(){ if(sb){ try{ await sb.auth.signOut(); }catch(e){} } try{ location.reload(); }catch(e){} }
+let currentUser=null, _upTimer=null, _applying=false;
+function ftBlockLocal(){ const o={}; try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k && k.indexOf('ft:')===0) o[k]=localStorage.getItem(k); } }catch(e){} return o; }
+function wipeFtLocal(){ try{ const del=[]; for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k && k.indexOf('ft:')===0) del.push(k);} del.forEach(k=>localStorage.removeItem(k)); }catch(e){} }
+function applyFtBlock(block){ wipeFtLocal(); try{ Object.keys(block||{}).forEach(k=>{ if(k.indexOf('ft:')===0) localStorage.setItem(k, block[k]); }); }catch(e){} }
+function scheduleUpload(){ if(_applying || !sb || !currentUser) return; if(_upTimer) clearTimeout(_upTimer); _upTimer=setTimeout(()=>{ syncUpload(); }, 1500); }
+async function syncUpload(){ if(!sb || !currentUser) return; try{ await sb.from('zenith_data').upsert({user_id:currentUser.id, data:ftBlockLocal(), updated_at:new Date().toISOString()}); }catch(e){} }
+async function syncDownload(){
+  if(!sb || !currentUser) return;
+  try{
+    const { data, error } = await sb.from('zenith_data').select('data').eq('user_id', currentUser.id).maybeSingle();
+    if(error) return;                                  // Serverfehler -> lokal weiterarbeiten, kein Datenverlust
+    _applying=true;
+    if(data && data.data && Object.keys(data.data).length){ applyFtBlock(data.data); }   // Server hat Daten -> übernehmen
+    else { wipeFtLocal(); try{ await sb.from('zenith_data').upsert({user_id:currentUser.id, data:{}, updated_at:new Date().toISOString()}); }catch(e){} }  // frisch
+    _applying=false;
+  }catch(e){ _applying=false; }
+}
+async function onLoggedIn(session){
+  const g=document.getElementById('authgate'); if(g) g.style.display='none';
+  try{ currentUser = (session && session.user) ? session.user : ((await sb.auth.getUser()).data.user); }catch(e){}
+  if(!_appStarted){ _appStarted=true; await syncDownload(); startApp(); }
+}
+async function logout(){ try{ await syncUpload(); }catch(e){} if(sb){ try{ await sb.auth.signOut(); }catch(e){} } try{ location.reload(); }catch(e){} }
 async function authInit(){
   if(!sb){ if(!_appStarted){ _appStarted=true; startApp(); } return; }   // keine Lib/kein Netz -> App wie bisher
   try{
-    sb.auth.onAuthStateChange((ev, session)=>{ if(session) onLoggedIn(); });
+    sb.auth.onAuthStateChange((ev, session)=>{ if(session) onLoggedIn(session); });
     const { data } = await sb.auth.getSession();
-    if(data && data.session){ onLoggedIn(); } else { showAuthGate(); }
+    if(data && data.session){ onLoggedIn(data.session); } else { showAuthGate(); }
   }catch(e){ if(!_appStarted){ _appStarted=true; startApp(); } }
 }
+try{ if(typeof window!=='undefined' && window.addEventListener){ window.addEventListener('pagehide', ()=>{ if(sb && currentUser){ try{ sb.from('zenith_data').upsert({user_id:currentUser.id, data:ftBlockLocal(), updated_at:new Date().toISOString()}); }catch(e){} } }); } }catch(e){}
 const state = {prot:null, train:null, water:null, bloat:null};
 
 function iso(d){ return d.toISOString().slice(0,10); }
