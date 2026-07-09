@@ -169,6 +169,18 @@
   .db-item-x:active{border-color:var(--red); color:var(--red);}
   .fc-btns{display:flex; gap:8px;}
   .legal{font-family:'Barlow',sans-serif;}
+  .bk-file{width:100%; margin:8px 0; color:var(--grey); font-size:12px;}
+  #authgate{position:fixed; inset:0; z-index:120; background:var(--ink); display:none; flex-direction:column; align-items:center; justify-content:center; padding:24px; text-align:center;}
+  .ag-logo{font-family:'Anton'; font-size:60px; color:#fff; width:96px; height:96px; line-height:96px; text-align:center; background:var(--red); border-radius:16px; margin-bottom:16px;}
+  .ag-title{font-family:'Anton'; text-transform:uppercase; font-size:30px; color:var(--bone); letter-spacing:1px;}
+  .ag-tag{font-family:'Barlow Condensed'; font-size:13px; color:var(--grey); margin-bottom:22px;}
+  .ag-box{width:100%; max-width:340px;}
+  .ag-tabs{display:flex; gap:8px; margin-bottom:14px;}
+  .ag-tab{flex:1; background:transparent; border:1px solid var(--line); color:var(--grey); font-family:'Barlow Condensed'; font-weight:700; text-transform:uppercase; letter-spacing:1px; font-size:13px; padding:10px; border-radius:4px; cursor:pointer;}
+  .ag-tab.on{background:var(--red); color:#fff; border-color:var(--red);}
+  #authgate input{width:100%; background:var(--panel); border:1px solid var(--line); color:var(--bone); font-family:'Barlow'; font-size:16px; padding:13px; border-radius:6px; margin-bottom:10px; box-sizing:border-box;}
+  #authgate input:focus{outline:none; border-color:var(--red);}
+  .ag-msg{font-size:13px; color:var(--grey); margin-top:12px; line-height:1.45; min-height:18px;}
   .legal-disc{font-size:12.5px; line-height:1.5; color:var(--grey); background:var(--ink); border:1px solid var(--line); border-left:3px solid var(--red); border-radius:6px; padding:12px;}
   .legal-disc b{color:var(--bone);}
   .legal-toggle{width:100%; margin-top:12px; background:transparent; border:1px solid var(--line); color:var(--grey); font-family:'Barlow Condensed'; font-weight:700; text-transform:uppercase; letter-spacing:1px; font-size:13px; padding:10px; border-radius:4px; cursor:pointer;}
@@ -301,6 +313,22 @@
   .fc-rest.over .fc-restbar>div{background:var(--red);}
   .fc-restnote{font-weight:600; letter-spacing:0; text-transform:none; color:var(--grey); font-size:11.5px;}
 </style>
+
+<div id="authgate">
+  <div class="ag-logo">Z</div>
+  <div class="ag-title">ZENITH</div>
+  <div class="ag-tag">der höchste Punkt – dein Bestes</div>
+  <div class="ag-box">
+    <div class="ag-tabs">
+      <button id="ag-tab-login" class="ag-tab on" onclick="agMode('login')">Einloggen</button>
+      <button id="ag-tab-signup" class="ag-tab" onclick="agMode('signup')">Konto erstellen</button>
+    </div>
+    <input id="ag-email" type="email" inputmode="email" autocomplete="email" placeholder="E-Mail">
+    <input id="ag-pass" type="password" autocomplete="current-password" placeholder="Passwort (mind. 6 Zeichen)">
+    <button id="ag-go" class="coachbtn" onclick="agSubmit()">Einloggen</button>
+    <div id="ag-msg" class="ag-msg"></div>
+  </div>
+</div>
 
 <div id="splash" onclick="hideSplash()">
   <div class="sp-logo">Z</div>
@@ -442,9 +470,17 @@
       <div id="scanbody"></div>
     </div>
   </div>
+
+  <div id="backupmodal" class="modal" onclick="closeBackup(event)">
+    <div class="scanwrap" onclick="event.stopPropagation()">
+      <div class="modalhead"><span id="bk-title">Daten sichern</span><button class="modalx" onclick="closeBackup()">✕</button></div>
+      <div id="backupbody"></div>
+    </div>
+  </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
 // Speicher-Fallback: auf echter Website (Vercel/Handy) localStorage, in Claude window.storage
@@ -458,6 +494,54 @@ if(typeof window.storage === 'undefined' || !window.storage){
 }
 
 const KEY = d => "ft:"+d;
+
+// ---- Supabase-Login (Schicht vor der App; App läuft ohne Netz/Backend normal weiter) ----
+const SUPABASE_URL='https://tydglqnpsbdabaxfrpha.supabase.co';
+const SUPABASE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR5ZGdscW5wc2JkYWJheGZycGhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1OTk3NDksImV4cCI6MjA5OTE3NTc0OX0.pCqdy_PVuwmMABP4t8gpXii9MhD53fv2paVJtLDap6Q';
+let sb=null;
+try{ if(typeof window!=='undefined' && window.supabase && window.supabase.createClient){ sb=window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON); } }catch(e){ sb=null; }
+let agCurrent='login', _appStarted=false;
+function agMode(m){
+  agCurrent=m;
+  const l=document.getElementById('ag-tab-login'), s=document.getElementById('ag-tab-signup'), go=document.getElementById('ag-go'), p=document.getElementById('ag-pass');
+  if(l&&s){ l.className='ag-tab'+(m==='login'?' on':''); s.className='ag-tab'+(m==='signup'?' on':''); }
+  if(go) go.textContent = m==='login'?'Einloggen':'Konto erstellen';
+  if(p) p.setAttribute('autocomplete', m==='login'?'current-password':'new-password');
+  const msg=document.getElementById('ag-msg'); if(msg) msg.textContent = m==='login'?'':'Neu hier? Wähl eine E-Mail und ein Passwort (mind. 6 Zeichen).';
+}
+async function agSubmit(){
+  const email=(document.getElementById('ag-email').value||'').trim();
+  const pass=(document.getElementById('ag-pass').value||'');
+  const msg=document.getElementById('ag-msg');
+  if(!email || email.indexOf('@')<1){ if(msg) msg.textContent='Bitte gültige E-Mail eingeben.'; return; }
+  if(pass.length<6){ if(msg) msg.textContent='Passwort muss mindestens 6 Zeichen haben.'; return; }
+  if(!sb){ if(msg) msg.textContent='Keine Verbindung zum Server. Bist du online?'; return; }
+  if(msg) msg.textContent = agCurrent==='login'?'Melde an…':'Erstelle Konto…';
+  try{
+    if(agCurrent==='signup'){
+      const { data, error } = await sb.auth.signUp({ email, password:pass });
+      if(error){ if(msg) msg.textContent='Fehler: '+error.message; return; }
+      if(data && data.session){ onLoggedIn(); return; }        // ohne E-Mail-Bestätigung -> direkt drin
+      if(msg) msg.innerHTML='<b style="color:var(--red)">Konto erstellt ✔</b> Bestätige zuerst den Link in deiner E-Mail, dann einloggen.';
+      agMode('login');
+    } else {
+      const { data, error } = await sb.auth.signInWithPassword({ email, password:pass });
+      if(error){ if(msg) msg.textContent='Login fehlgeschlagen: '+error.message; return; }
+      if(data && data.session){ onLoggedIn(); }
+    }
+  }catch(e){ if(msg) msg.textContent='Etwas ist schiefgelaufen. Versuch es nochmal.'; }
+}
+function showAuthGate(){ const s=document.getElementById('splash'); if(s) s.style.display='none'; const g=document.getElementById('authgate'); if(g) g.style.display='flex'; agMode('login'); }
+function onLoggedIn(){ const g=document.getElementById('authgate'); if(g) g.style.display='none'; if(!_appStarted){ _appStarted=true; startApp(); } }
+async function logout(){ if(sb){ try{ await sb.auth.signOut(); }catch(e){} } try{ location.reload(); }catch(e){} }
+async function authInit(){
+  if(!sb){ if(!_appStarted){ _appStarted=true; startApp(); } return; }   // keine Lib/kein Netz -> App wie bisher
+  try{
+    sb.auth.onAuthStateChange((ev, session)=>{ if(session) onLoggedIn(); });
+    const { data } = await sb.auth.getSession();
+    if(data && data.session){ onLoggedIn(); } else { showAuthGate(); }
+  }catch(e){ if(!_appStarted){ _appStarted=true; startApp(); } }
+}
 const state = {prot:null, train:null, water:null, bloat:null};
 
 function iso(d){ return d.toISOString().slice(0,10); }
@@ -1160,7 +1244,7 @@ let essenSel = new Date().getDay();
 let PROFILE = {name:'', sex:'m', age:35, height:178, weight:83, target:75, start:83, days:4, goal:'lose', diet:'omni', shake:0};
 let curWeight = PROFILE.weight;
 let showProfileForm = false;
-(async()=>{
+async function startApp(){
   let hasProfile=false;
   try{ const r=await window.storage.get("ft:profile"); if(r){ PROFILE=Object.assign(PROFILE, JSON.parse(r.value)); curWeight=PROFILE.weight; hasProfile=true; } }catch(e){}
   await loadDayLog();
@@ -1168,7 +1252,7 @@ let showProfileForm = false;
   if(typeof renderEssen==='function') renderEssen(essenSel);
   if(!hasProfile){ switchView('profil'); }
   initSplash();
-})();
+}
 
 const SPLASH_QUOTES = [
   'Disziplin schlägt Talent.','Jeder Tag zählt. Auch heute.','Der Ring belohnt Konstanz.','Steh auf. Deckung hoch. Weiter.',
@@ -1263,6 +1347,12 @@ function renderProfil(){
   let html = '<div class="card"><h2>Dein Profil</h2>'
     + '<p class="fc-hint">Deine Angaben bestimmen Kalorien, Makros und den Essensplan. Alles bleibt nur auf deinem Gerät.</p>'
     + profileFormHTML() + '</div>';
+  html += '<div class="card"><h2>Daten sichern</h2>'
+    + '<p class="fc-hint">Deine Daten liegen nur auf diesem Gerät. Sichere sie regelmäßig – dann geht bei einem Update, Handywechsel oder gelöschten Icon nichts verloren. Am besten nach jeder Woche kurz sichern.</p>'
+    + '<div class="fc-btns"><button class="coachbtn" onclick="openExport()">⬇ Daten sichern</button>'
+    + '<button class="coachbtn ghost" onclick="openImport()">⬆ Daten laden</button></div>'
+    + ((typeof sb!=='undefined' && sb) ? '<button class="coachbtn ghost" style="margin-top:8px" onclick="logout()">Abmelden</button>' : '')
+    + '</div>';
   html += '<div class="card legal">'
     + '<div class="legal-disc"><b>Wichtiger Hinweis:</b> ZENITH ist ein Tool zur Orientierung, kein medizinischer, ernährungsmedizinischer oder therapeutischer Rat. Alle Kalorien- und Makro-Werte sind Richtwerte. Hol dir bei gesundheitlichen Fragen, Vorerkrankungen, Schwangerschaft oder vor größeren Ernährungs- oder Trainingsumstellungen den Rat einer Ärztin, eines Arztes oder einer diplomierten Ernährungsfachkraft. Die Nutzung erfolgt auf eigene Verantwortung.</div>'
     + '<button class="legal-toggle" onclick="toggleLegal()">Impressum &amp; Datenschutz ▾</button>'
@@ -1525,6 +1615,65 @@ function removeCustom(id){
   if(dayLog.custom) dayLog.custom = dayLog.custom.filter(c=>c.id!==id);
   saveDayLog();
   renderEssen(essenSel);
+}
+
+// ---- Daten sichern & laden (lokales Backup als Text/Datei) ----
+function closeBackup(ev){ if(ev && ev.target && ev.target.id!=='backupmodal') return; document.getElementById('backupmodal').className='modal'; }
+async function openExport(){
+  document.getElementById('bk-title').textContent='Daten sichern';
+  document.getElementById('backupmodal').className='modal show';
+  const b=document.getElementById('backupbody');
+  b.innerHTML='<div class="scan-msg">Sammle deine Daten…</div>';
+  const r=await window.storage.list('ft:'); const keys=(r&&r.keys)||[];
+  const data={};
+  for(const k of keys){ try{ const g=await window.storage.get(k); if(g) data[k]=g.value; }catch(e){} }
+  const payload=JSON.stringify({app:'ZENITH', v:1, at:new Date().toISOString(), data:data});
+  const dateStr=todayISO();
+  b.innerHTML='<div class="scan-msg">Das ist deine komplette Sicherung. <b>Kopier den Text</b> und schick ihn dir selbst (z. B. per WhatsApp oder in eine Notiz) – oder lad ihn als Datei. Zum Wiederherstellen später auf „Daten laden".</div>'
+    + '<textarea id="bk-out" class="fc-in" rows="5" readonly>'+payload.replace(/</g,'&lt;')+'</textarea>'
+    + '<div class="fc-btns"><button class="coachbtn" onclick="copyBackup()">Text kopieren</button>'
+    + '<button class="coachbtn ghost" onclick="downloadBackup()">Als Datei</button></div>'
+    + '<div id="bk-msg" class="scan-msg"></div>';
+  window._bkPayload=payload; window._bkDate=dateStr;
+}
+function copyBackup(){
+  const t=window._bkPayload||'';
+  const done=()=>{ const m=document.getElementById('bk-msg'); if(m) m.innerHTML='<b style="color:var(--red)">Kopiert ✔</b> Jetzt in eine Notiz oder Nachricht an dich selbst einfügen.'; };
+  if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(done).catch(()=>{ const el=document.getElementById('bk-out'); if(el){ el.removeAttribute('readonly'); el.focus(); el.select(); } done(); }); }
+  else { const el=document.getElementById('bk-out'); if(el){ el.removeAttribute('readonly'); el.focus(); el.select(); try{document.execCommand('copy');}catch(e){} } done(); }
+}
+function downloadBackup(){
+  try{
+    const blob=new Blob([window._bkPayload||''], {type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a'); a.href=url; a.download='zenith-backup-'+(window._bkDate||'')+'.json';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url), 2000);
+  }catch(e){ const m=document.getElementById('bk-msg'); if(m) m.textContent='Datei-Download klappt auf diesem Gerät nicht – nutz bitte „Text kopieren".'; }
+}
+function openImport(){
+  document.getElementById('bk-title').textContent='Daten laden';
+  document.getElementById('backupmodal').className='modal show';
+  document.getElementById('backupbody').innerHTML=
+      '<div class="scan-msg">Füg hier deine Sicherung ein (den kopierten Text) oder wähl die gesicherte Datei. <b>Achtung:</b> Das überschreibt die aktuellen Daten auf diesem Gerät.</div>'
+    + '<textarea id="bk-in" class="fc-in" rows="5" placeholder=\'{"app":"ZENITH",...}\'></textarea>'
+    + '<input id="bk-file" type="file" accept="application/json,.json" class="bk-file" onchange="readBackupFile(event)">'
+    + '<button class="coachbtn" onclick="doImport()">Daten wiederherstellen</button>'
+    + '<div id="bk-msg" class="scan-msg"></div>';
+}
+function readBackupFile(ev){
+  const f=ev.target.files&&ev.target.files[0]; if(!f) return;
+  const rd=new FileReader(); rd.onload=()=>{ const el=document.getElementById('bk-in'); if(el) el.value=rd.result; }; rd.readAsText(f);
+}
+async function doImport(){
+  const el=document.getElementById('bk-in'); const msg=document.getElementById('bk-msg');
+  let parsed;
+  try{ parsed=JSON.parse((el&&el.value||'').trim()); }catch(e){ if(msg) msg.textContent='Das ist keine gültige Sicherung – bitte den kompletten Text einfügen.'; return; }
+  if(!parsed || !parsed.data || typeof parsed.data!=='object'){ if(msg) msg.textContent='Die Sicherung sieht nicht richtig aus (kein „data"-Teil).'; return; }
+  let n=0;
+  for(const k in parsed.data){ if(k.indexOf('ft:')!==0) continue; try{ await window.storage.set(k, parsed.data[k], false); n++; }catch(e){} }
+  if(msg) msg.innerHTML='<b style="color:var(--red)">'+n+' Einträge wiederhergestellt ✔</b> App wird neu geladen…';
+  setTimeout(()=>{ try{ location.reload(); }catch(e){} }, 900);
 }
 
 // ---- Barcode-Scanner + lokaler Produktspeicher (lernt gescannte Produkte auf diesem Gerät) ----
@@ -1836,4 +1985,7 @@ function renderEinkauf(){
   document.getElementById('view-einkauf').innerHTML = html;
 }
 renderEinkauf();
+
+// App-Start über die Login-Schicht (ohne Backend/Netz startet sie direkt)
+authInit();
 </script>
