@@ -168,6 +168,18 @@
   .db-item-x:active{border-color:var(--red); color:var(--red);}
   .fc-btns{display:flex; gap:8px;}
   .fc-btns .coachbtn{flex:1;}
+  .scanbtn{margin-top:8px; background:var(--panel); border-color:var(--line); color:var(--bone); font-size:15px;}
+  .scanbtn:active{border-color:var(--red);}
+  .scanwrap{width:100%; max-width:420px; background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:16px;}
+  .reader{width:100%; border-radius:8px; overflow:hidden; background:#000; min-height:220px;}
+  .scan-msg{color:var(--grey); font-size:13px; margin:10px 0; line-height:1.4;}
+  .scan-form{margin-top:6px;}
+  .scan-prod{background:var(--ink); border:1px solid var(--line); border-radius:6px; padding:10px; margin-bottom:10px;}
+  .scan-prod b{display:block; color:var(--bone); font-size:15px;}
+  .scan-prod span{color:var(--grey); font-size:12.5px;}
+  .scan-quick{color:var(--grey); font-size:12px; margin:8px 0; display:flex; align-items:center; gap:6px; flex-wrap:wrap;}
+  .scan-quick button{background:var(--ink); border:1px solid var(--line); color:var(--bone); border-radius:4px; padding:5px 10px; cursor:pointer; font-family:'Barlow Condensed'; font-weight:700;}
+  .scan-quick button:active{border-color:var(--red); color:var(--red);}
   .coachbtn.ghost{background:transparent; color:var(--grey); border-color:var(--line); font-size:14px;}
   .coachbtn.ghost:active{border-color:var(--red); color:var(--bone);}
   .db-hint{font-size:12px; color:var(--grey); font-style:italic; margin-top:8px; line-height:1.4;}
@@ -411,7 +423,16 @@
       <button class="deletebtn" onclick="closeShare()">Schließen</button>
     </div>
   </div>
+
+  <div id="scanmodal" class="modal" onclick="closeScanner(event)">
+    <div class="scanwrap" onclick="event.stopPropagation()">
+      <div class="modalhead"><span>Barcode scannen</span><button class="modalx" onclick="closeScanner()">✕</button></div>
+      <div id="scanbody"></div>
+    </div>
+  </div>
 </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
 
 <script>
 // Speicher-Fallback: auf echter Website (Vercel/Handy) localStorage, in Claude window.storage
@@ -1131,6 +1152,7 @@ let showProfileForm = false;
   let hasProfile=false;
   try{ const r=await window.storage.get("ft:profile"); if(r){ PROFILE=Object.assign(PROFILE, JSON.parse(r.value)); curWeight=PROFILE.weight; hasProfile=true; } }catch(e){}
   await loadDayLog();
+  await loadProducts();
   if(typeof renderEssen==='function') renderEssen(essenSel);
   if(!hasProfile){ switchView('profil'); }
   initSplash();
@@ -1482,6 +1504,95 @@ function removeCustom(id){
   renderEssen(essenSel);
 }
 
+// ---- Barcode-Scanner + lokaler Produktspeicher (lernt gescannte Produkte auf diesem Gerät) ----
+let PRODUCTS = {};   // { barcode: {name, kc, p, f, c}  jeweils pro 100 g }
+async function loadProducts(){ try{ const r=await window.storage.get('ft:products'); if(r) PRODUCTS=JSON.parse(r.value)||{}; }catch(e){ PRODUCTS={}; } }
+function saveProducts(){ try{ window.storage.set('ft:products', JSON.stringify(PRODUCTS), false); }catch(e){} }
+let _scanner=null, _scanCode='';
+function scanBody(){ return document.getElementById('scanbody'); }
+function openScanner(){
+  document.getElementById('scanmodal').className='modal show';
+  if(typeof Html5Qrcode==='undefined'){
+    scanBody().innerHTML='<div class="scan-msg">Der Scanner konnte nicht geladen werden (keine Internetverbindung?). Du kannst das Produkt auch von Hand eintragen.</div>'+manualFormHTML('');
+    return;
+  }
+  scanBody().innerHTML='<div id="reader" class="reader"></div><div class="scan-msg" id="scan-msg">Kamera startet… Halte den Barcode ins Bild.</div><button class="coachbtn ghost" onclick="scanManual()">Stattdessen von Hand eintragen</button>';
+  _scanner=new Html5Qrcode('reader');
+  _scanner.start({facingMode:'environment'}, {fps:10, qrbox:{width:260,height:170}},
+    (txt)=>{ onScanCode(txt); },
+    ()=>{} 
+  ).catch(err=>{
+    scanBody().innerHTML='<div class="scan-msg">Kamera nicht verfügbar oder Zugriff verweigert. Trag das Produkt von Hand ein:</div>'+manualFormHTML('');
+  });
+}
+function stopScanner(){ if(_scanner){ try{ _scanner.stop().then(()=>{ try{_scanner.clear();}catch(e){} _scanner=null; }).catch(()=>{_scanner=null;}); }catch(e){ _scanner=null; } } }
+function closeScanner(ev){ if(ev && ev.target && ev.target.id && ev.target.id!=='scanmodal' && ev.type==='click' && ev.currentTarget!==ev.target) {} stopScanner(); document.getElementById('scanmodal').className='modal'; }
+async function onScanCode(code){
+  stopScanner();
+  _scanCode=code;
+  const m=scanBody(); m.innerHTML='<div class="scan-msg">Barcode '+code+' erkannt. Suche Produkt…</div>';
+  // 1) lokal bekannt?
+  if(PRODUCTS[code]){ stepGrams(code); return; }
+  // 2) Open Food Facts
+  try{
+    const res=await fetch('https://world.openfoodfacts.org/api/v2/product/'+encodeURIComponent(code)+'.json?fields=product_name,brands,nutriments');
+    const data=await res.json();
+    if(data && data.status===1 && data.product){
+      const p=data.product, n=p.nutriments||{};
+      let kc = n['energy-kcal_100g'];
+      if(kc==null && n['energy_100g']!=null) kc = n['energy_100g']/4.184; // kJ -> kcal
+      const name=((p.brands?p.brands.split(',')[0]+' ':'')+(p.product_name||'Produkt')).trim().slice(0,50);
+      if(kc!=null){
+        PRODUCTS[code]={name:name, kc:Math.round(kc), p:Math.round((n.proteins_100g||0)*10)/10, f:Math.round((n.fat_100g||0)*10)/10, c:Math.round((n.carbohydrates_100g||0)*10)/10};
+        saveProducts();
+        stepGrams(code); return;
+      }
+    }
+  }catch(e){}
+  // 3) nicht gefunden -> von Hand eintragen (App lernt es dann)
+  m.innerHTML='<div class="scan-msg">Produkt nicht in der Datenbank gefunden. Trag die Werte von der Packung ein – die App merkt sich das Produkt für nächstes Mal.</div>'+manualFormHTML(code);
+}
+function scanManual(){ stopScanner(); scanBody().innerHTML=manualFormHTML(''); }
+function manualFormHTML(code){
+  return '<div class="scan-form">'
+    + '<div class="pf-row"><label>Produktname</label><input id="sc-name" type="text" placeholder="z. B. Spar Mix Obst"></div>'
+    + '<div class="pf-row"><label>kcal pro 100 g</label><input id="sc-kc" type="number" inputmode="numeric" placeholder="z. B. 60"></div>'
+    + '<div class="pf-row"><label>Protein / 100 g (optional)</label><input id="sc-p" type="number" inputmode="decimal" placeholder="g"></div>'
+    + '<div class="pf-row"><label>Fett / 100 g (optional)</label><input id="sc-f" type="number" inputmode="decimal" placeholder="g"></div>'
+    + '<div class="pf-row"><label>KH / 100 g (optional)</label><input id="sc-c" type="number" inputmode="decimal" placeholder="g"></div>'
+    + '<button class="coachbtn" onclick="saveManualProduct(\''+code+'\')">Speichern</button>'
+    + '</div>';
+}
+function saveManualProduct(code){
+  const gv=id=>{ const el=document.getElementById(id); return el?el.value:''; };
+  const name=(gv('sc-name')||'Produkt').trim().slice(0,50);
+  const kc=Math.round(parseFloat((gv('sc-kc')||'').replace(',','.'))||0);
+  if(kc<=0){ const el=document.getElementById('sc-kc'); if(el) el.style.borderColor='var(--red)'; return; }
+  const prod={name:name, kc:kc, p:parseFloat((gv('sc-p')||'').replace(',','.'))||0, f:parseFloat((gv('sc-f')||'').replace(',','.'))||0, c:parseFloat((gv('sc-c')||'').replace(',','.'))||0};
+  const key = code || ('manual-'+Date.now());
+  PRODUCTS[key]=prod; saveProducts();
+  stepGrams(key);
+}
+function stepGrams(code){
+  const p=PRODUCTS[code];
+  scanBody().innerHTML='<div class="scan-prod"><b>'+p.name+'</b><span>'+p.kc+' kcal · P'+p.p+' F'+p.f+' KH'+p.c+' (pro 100 g)</span></div>'
+    + '<div class="pf-row"><label>Wie viel gegessen? (g)</label><input id="sc-g" type="number" inputmode="numeric" value="100"></div>'
+    + '<div class="scan-quick">Schnell: <button onclick="setG(30)">30</button><button onclick="setG(50)">50</button><button onclick="setG(100)">100</button><button onclick="setG(150)">150</button><button onclick="setG(200)">200</button></div>'
+    + '<button class="coachbtn" onclick="addScanned(\''+code+'\')">+ Zum Tag hinzufügen</button>';
+}
+function setG(v){ const el=document.getElementById('sc-g'); if(el) el.value=v; }
+function addScanned(code){
+  const p=PRODUCTS[code]; if(!p) return;
+  const g=Math.max(1, parseFloat((document.getElementById('sc-g').value||'100').replace(',','.'))||100);
+  const f=g/100;
+  if(!dayLog.custom) dayLog.custom=[];
+  dayLog.custom.push({id:Date.now()+''+Math.floor(Math.random()*1000), label:p.name+' ('+Math.round(g)+' g)', kc:Math.round(p.kc*f), P:Math.round(p.p*f), F:Math.round(p.f*f), C:Math.round(p.c*f)});
+  saveDayLog();
+  stopScanner();
+  document.getElementById('scanmodal').className='modal';
+  renderEssen(essenSel);
+}
+
 function buildDay(day, t, addSnack, shake){
   const meals = day.meals.map(m=>({w:m.w, pre:m.pre||'', post:m.post||'', comp:m.comp.map(c=>c.slice()), alt:m.alt?m.alt.map(c=>c.slice()):null}));
   if(addSnack) meals.push({w:'Snack', pre:'', post:'für den Überschuss', comp:[['whey',30,1],['banana',120,2],['oats',40,2]], alt:null});
@@ -1621,6 +1732,7 @@ function renderEssen(s){
     + '<textarea id="fc-in" class="fc-in" rows="3" placeholder="z. B. 3 Messlöffel Whey, 1 Banane">'+(foodCalcText||'').replace(/</g,'&lt;')+'</textarea>'
     + '<div class="fc-btns"><button class="coachbtn ghost" onclick="calcFood()">Berechnen</button>'
     + '<button class="coachbtn" onclick="addFood()">+ Zum Tag hinzufügen</button></div>'
+    + '<button class="coachbtn scanbtn" onclick="openScanner()">📷 Barcode scannen</button>'
     + '<div id="fc-out" class="fc-out"></div></div>';
   html += '<div class="rulesbox">'
         + '<div class="rules-h">Wichtig zu wissen</div>'
