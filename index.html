@@ -170,6 +170,11 @@
   .fc-btns{display:flex; gap:8px;}
   .legal{font-family:'Barlow',sans-serif;}
   .bk-file{width:100%; margin:8px 0; color:var(--grey); font-size:12px;}
+  .inst-block{margin-top:14px;}
+  .inst-h{font-family:'Barlow Condensed'; font-weight:700; text-transform:uppercase; letter-spacing:1px; font-size:13px; color:var(--bone); margin-bottom:8px;}
+  .inst-step{display:flex; align-items:flex-start; gap:10px; font-size:13.5px; line-height:1.45; color:var(--grey); padding:4px 0;}
+  .inst-step span{flex:0 0 auto; width:20px; height:20px; line-height:20px; text-align:center; background:var(--red); color:#fff; border-radius:50%; font-size:12px; font-weight:700; margin-top:1px;}
+  .inst-step b{color:var(--bone);}
   #authgate{position:fixed; inset:0; z-index:120; background:var(--ink); display:none; flex-direction:column; align-items:center; justify-content:center; padding:24px; text-align:center;}
   .ag-logo{font-family:'Anton'; font-size:60px; color:#fff; width:96px; height:96px; line-height:96px; text-align:center; background:var(--red); border-radius:16px; margin-bottom:16px;}
   .ag-title{font-family:'Anton'; text-transform:uppercase; font-size:30px; color:var(--bone); letter-spacing:1px;}
@@ -390,7 +395,11 @@
 
   <!-- Log -->
   <div class="card">
-    <h2>Heute eintragen</h2>
+    <h2 id="log-title">Heute eintragen</h2>
+    <div class="field">
+      <label>Tag (auch nachträglich)</label>
+      <input id="logdate" type="date" class="datein">
+    </div>
     <div class="field">
       <label>Gewicht (morgens, nüchtern)</label>
       <div class="wt"><input id="wt" type="number" inputmode="decimal" step="0.1" placeholder="83.0"><span>kg</span></div>
@@ -572,7 +581,30 @@ async function authInit(){
   }catch(e){ if(!_appStarted){ _appStarted=true; startApp(); } }
 }
 try{ if(typeof window!=='undefined' && window.addEventListener){ window.addEventListener('pagehide', ()=>{ if(sb && currentUser){ try{ sb.from('zenith_data').upsert({user_id:currentUser.id, data:ftBlockLocal(), updated_at:new Date().toISOString()}); }catch(e){} } }); } }catch(e){}
+
+// ---- Installieren (PWA) ----
+let _deferredInstall=null;
+try{ if(typeof window!=='undefined' && window.addEventListener){ window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); _deferredInstall=e; if(typeof renderProfil==='function' && document.getElementById('view-profil')) renderProfil(); }); } }catch(e){}
+function isStandalone(){ try{ return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone===true; }catch(e){ return false; } }
+function doInstall(){ if(_deferredInstall){ try{ _deferredInstall.prompt(); _deferredInstall.userChoice.finally(()=>{ _deferredInstall=null; if(typeof renderProfil==='function') renderProfil(); }); }catch(e){} } }
+function installCardHTML(){
+  if(isStandalone()) return '<div class="card"><h2>App installiert ✔</h2><p class="fc-hint">ZENITH läuft bei dir als App vom Home-Bildschirm – im Vollbild, ohne Browser-Leiste. 💪</p></div>';
+  const androidBtn = _deferredInstall ? '<button class="coachbtn" onclick="doInstall()">Jetzt installieren</button>' : '';
+  return '<div class="card"><h2>ZENITH installieren</h2>'
+    + '<p class="fc-hint">Leg ZENITH als App auf deinen Home-Bildschirm – dann öffnet es sich im Vollbild wie eine normale App, ganz ohne App Store.</p>'
+    + androidBtn
+    + '<div class="inst-block"><div class="inst-h">📱 iPhone / iPad (Safari)</div>'
+    + '<div class="inst-step"><span>1</span>Diese Seite in <b>Safari</b> öffnen</div>'
+    + '<div class="inst-step"><span>2</span>Unten auf das <b>Teilen-Symbol</b> tippen (Quadrat mit Pfeil nach oben)</div>'
+    + '<div class="inst-step"><span>3</span><b>„Zum Home-Bildschirm"</b> wählen</div></div>'
+    + '<div class="inst-block"><div class="inst-h">🤖 Android (Chrome)</div>'
+    + '<div class="inst-step"><span>1</span>Diese Seite in <b>Chrome</b> öffnen</div>'
+    + '<div class="inst-step"><span>2</span>Oben rechts auf das <b>Menü (⋮)</b> tippen</div>'
+    + '<div class="inst-step"><span>3</span><b>„App installieren"</b> bzw. „Zum Startbildschirm" wählen</div></div>'
+    + '</div>';
+}
 const state = {prot:null, train:null, water:null, bloat:null};
+let logDate = todayISO();
 
 function iso(d){ return d.toISOString().slice(0,10); }
 function todayISO(){ return iso(new Date()); }
@@ -612,9 +644,16 @@ async function allEntries(){
   return list;
 }
 
-// prefill today if exists
-(async()=>{
-  const t = await loadDay(todayISO());
+function clearForm(){
+  const wt=document.getElementById('wt'); if(wt) wt.value='';
+  const note=document.getElementById('note'); if(note) note.value='';
+  ['prot','train','water','bloat'].forEach(k=>{ state[k]=null;
+    const seg=document.querySelector('.seg[data-seg="'+k+'"]'); if(seg) seg.querySelectorAll('button').forEach(x=>x.classList.remove('on')); });
+}
+function updateLogTitle(){ const el=document.getElementById('log-title'); if(el) el.textContent = (logDate===todayISO())?'Heute eintragen':('Eintragen für '+fmtDE(logDate)); }
+async function fillForm(d){
+  clearForm();
+  const t = await loadDay(d);
   if(t){
     if(t.weight) document.getElementById('wt').value=t.weight;
     if(t.note) document.getElementById('note').value=t.note;
@@ -624,6 +663,20 @@ async function allEntries(){
         const b=seg&&seg.querySelector('button[data-v="'+t[k]+'"]'); if(b)b.classList.add('on'); }
     }
   }
+  updateLogTitle();
+}
+async function setLogDate(v){
+  if(!v) return;
+  const today=todayISO(); if(v>today) v=today;      // Zukunft nicht erlaubt
+  logDate=v;
+  const el=document.getElementById('logdate'); if(el) el.value=v;
+  await fillForm(v);
+}
+// Datumsfeld initialisieren + prefill des heutigen (oder gewählten) Tages
+(async()=>{
+  const el=document.getElementById('logdate');
+  if(el){ el.max=todayISO(); el.value=logDate; el.onchange=(e)=>setLogDate(e.target.value); }
+  await fillForm(logDate);
   refresh();
 })();
 
@@ -652,7 +705,7 @@ function motivate(){ return MOTIVATION[Math.floor(Math.random()*MOTIVATION.lengt
 document.getElementById('save').onclick = async ()=>{
   const w = parseFloat(document.getElementById('wt').value);
   const entry = {
-    date: todayISO(),
+    date: logDate,
     weight: isNaN(w)?null:w,
     prot: state.prot, train: state.train, water: state.water, bloat: state.bloat,
     note: document.getElementById('note').value.trim()
@@ -1375,10 +1428,11 @@ function profileFormHTML(){
 }
 function renderProfil(){
   let html = '<div class="card"><h2>Dein Profil</h2>'
-    + '<p class="fc-hint">Deine Angaben bestimmen Kalorien, Makros und den Essensplan. Alles bleibt nur auf deinem Gerät.</p>'
+    + '<p class="fc-hint">Deine Angaben bestimmen Kalorien, Makros und den Essensplan. Sie sind mit deinem Konto verknüpft und werden sicher gespeichert.</p>'
     + profileFormHTML() + '</div>';
+  html += installCardHTML();
   html += '<div class="card"><h2>Daten sichern</h2>'
-    + '<p class="fc-hint">Deine Daten liegen nur auf diesem Gerät. Sichere sie regelmäßig – dann geht bei einem Update, Handywechsel oder gelöschten Icon nichts verloren. Am besten nach jeder Woche kurz sichern.</p>'
+    + '<p class="fc-hint">Deine Daten werden mit deinem Konto in der Cloud gesichert und stehen nach dem Login auf jedem Gerät zur Verfügung. Für ein zusätzliches Offline-Backup kannst du sie hier als Datei/Text exportieren.</p>'
     + '<div class="fc-btns"><button class="coachbtn" onclick="openExport()">⬇ Daten sichern</button>'
     + '<button class="coachbtn ghost" onclick="openImport()">⬆ Daten laden</button></div>'
     + ((typeof sb!=='undefined' && sb) ? '<button class="coachbtn ghost" style="margin-top:8px" onclick="logout()">Abmelden</button>' : '')
@@ -1388,9 +1442,9 @@ function renderProfil(){
     + '<button class="legal-toggle" onclick="toggleLegal()">Impressum &amp; Datenschutz ▾</button>'
     + '<div id="legal-body" class="legal-body">'
     + '<h3>Impressum</h3>'
-    + '<p class="legal-ph">[Vor- und Nachname / Firmenname]<br>[Anschrift]<br>[E-Mail]<br>[ggf. Telefon]<br>[ggf. Gewerbe / UID / Firmenbuchnummer]</p>'
+    + '<p class="legal-ph">Anel Kahric<br>Schenk-Danziger-Gasse 6/4/14<br>1220 Wien, Österreich<br>[E-Mail-Adresse eintragen]</p>'
     + '<h3>Datenschutzerklärung</h3>'
-    + '<p class="legal-ph">ZENITH speichert alle von dir eingegebenen Daten (Profil, Gewicht, Mahlzeiten, Training) ausschließlich lokal in deinem Browser auf deinem Gerät (localStorage). Es findet keine Übertragung an einen Server statt und es werden keine Konten angelegt.<br><br>Ausnahme: Beim Barcode-Scan wird der gescannte Strichcode an die offene Datenbank „Open Food Facts" (world.openfoodfacts.org) gesendet, um Produktdaten abzurufen. Dabei werden keine persönlichen Daten übertragen.<br><br>Verantwortlich im Sinne der DSGVO: [deine Kontaktdaten wie oben]. Du hast das Recht auf Auskunft, Berichtigung und Löschung deiner Daten – da alles lokal liegt, kannst du sie jederzeit selbst über „zurücksetzen" bzw. das Löschen der App entfernen.</p>'
+    + '<p class="legal-ph">Zur Nutzung von ZENITH legst du ein Konto mit deiner E-Mail-Adresse an. Deine eingegebenen Daten (Profil, Gewicht, Mahlzeiten, Training) werden deinem Konto zugeordnet und auf Servern unseres Dienstleisters Supabase in der EU (Frankfurt, Deutschland) gespeichert, damit sie auf deinen Geräten verfügbar bleiben. Zusätzlich werden sie lokal auf deinem Gerät zwischengespeichert, damit die App auch offline funktioniert. Deine Daten sind durch Zugriffsregeln geschützt, sodass nur du sie sehen kannst.<br><br>Beim Barcode-Scan wird der gescannte Strichcode an die offene Datenbank „Open Food Facts" (world.openfoodfacts.org) gesendet, um Produktdaten abzurufen. Dabei werden keine persönlichen Daten übertragen.<br><br>Verantwortlich im Sinne der DSGVO: Anel Kahric, Schenk-Danziger-Gasse 6/4/14, 1220 Wien, [E-Mail-Adresse]. Du hast das Recht auf Auskunft, Berichtigung und Löschung deiner Daten. Über „Abmelden" und die Reset-Funktionen kannst du deine Daten selbst verwalten; zur vollständigen Löschung deines Kontos genügt eine Nachricht an die oben genannte Adresse.</p>'
     + '<p class="legal-note">Hinweis: Diese Texte sind Platzhalter. Vor kommerzieller Veröffentlichung mit einem Impressums-/Datenschutz-Generator (z. B. WKO) oder einer Rechtsberatung final absichern.</p>'
     + '</div></div>';
   document.getElementById('view-profil').innerHTML = html;
@@ -1450,6 +1504,14 @@ const FOODS = {
   avocado:{n:'Avocado',p:2,f:15,c:9,u:'half'},
   veg:{n:'Gemüse',p:2,f:0.3,c:7},
   whey:{n:'Proteinshake',p:80,f:6,c:8,u:'shake'},
+};
+
+// Realistische Obergrenzen pro Zutat und Mahlzeit (Gramm), damit keine unessbaren Portionen entstehen
+const PORTION_MAX = {
+  oats:90, berries:150, quark:400, yog:400, bread:120, nuts:40,
+  chicken:260, turkey:260, mince:220, salmon:220, tuna:180,
+  rice:320, potato:360, lentils:260, chickpeas:260, tofu:280, tempeh:250,
+  veg:400, egg:300, white:132, banana:240, whey:120, cheese:60, hummus:100, halloumi:120, avocado:100,
 };
 
 // Skaliert Protein- und Kohlenhydratquellen so, dass die Tagessumme das Ziel trifft.
@@ -1819,8 +1881,17 @@ function buildDay(day, t, addSnack, shake){
       if(a[2]===2) baseAC+=F.c*a[1]/100; else { const g=a[1]*(a[2]===1?kP:1); fixedC+=F.c*g/100; } }));
     kC = baseAC>0 ? Math.max(0.3, Math.min(3.5,(t.carbs-fixedC)/baseAC)) : 1;
   }
+  function servingHint(comp){
+    const keys=comp.map(c=>c[0]); const has=k=>keys.indexOf(k)>=0;
+    if(has('oats') && (has('quark')||has('yog'))) return 'als Overnight Oats – abends verrühren, über Nacht im Kühlschrank quellen lassen';
+    if(has('oats') && !has('quark') && !has('yog')) return 'als Porridge – mit heißer Milch oder Wasser aufkochen';
+    return '';
+  }
   function render(comp){ let parts=[],P=0,F=0,C=0;
-    comp.forEach(a=>{ const Fd=FOODS[a[0]], fl=a[2]; let gg=roundUnit(a[0], a[1]*(fl===1?kP:fl===2?kC:1)); let disp;
+    comp.forEach(a=>{ const Fd=FOODS[a[0]], fl=a[2];
+      let scaled = a[1]*(fl===1?kP:fl===2?kC:1);
+      const cap = PORTION_MAX[a[0]]; if(cap) scaled = Math.min(scaled, cap);   // essbare Obergrenze
+      let gg=roundUnit(a[0], scaled); let disp;
       if(Fd.u==='egg'){ const n=Math.round(gg/50); disp=n+' '+(n===1?'Ei':'Eier'); }
       else if(Fd.u==='white'){ const n=Math.round(gg/33); disp=n+' Eiweiß'; }
       else if(Fd.u==='banana'){ const n=Math.round(gg/120); disp=n+' Banane'+(n>1?'n':''); }
@@ -1830,7 +1901,8 @@ function buildDay(day, t, addSnack, shake){
       P+=Fd.p*gg/100; F+=Fd.f*gg/100; C+=Fd.c*gg/100; parts.push(disp);
     });
     P=Math.round(P); F=Math.round(F); C=Math.round(C);
-    return {text:parts.join(' + '), P, F, C, kc:P*4+C*4+F*9};
+    const hint=servingHint(comp);
+    return {text:parts.join(' + ')+(hint?' — '+hint:''), P, F, C, kc:P*4+C*4+F*9};
   }
   const tot={P:0,F:0,C:0,kc:0};
   const out = meals.map(m=>{ const r=render(m.comp);
@@ -1839,6 +1911,12 @@ function buildDay(day, t, addSnack, shake){
     if(m.alt){ const ra=render(m.alt); o.altText=(m.pre||'')+ra.text+(m.post?' · '+m.post:''); o.altP=ra.P; o.altF=ra.F; o.altC=ra.C; o.altkc=ra.kc; }
     return o;
   });
+  // Kohlenhydrat-Lücke (durch Portionsdeckel) flexibel auffüllen statt unessbarer Riesenportion
+  const carbGap = Math.round(t.carbs - tot.C);
+  if(carbGap >= 20){ const kc=carbGap*4;
+    out.push({w:'Kohlenhydrate nach Bedarf', text:'+ '+carbGap+' g Kohlenhydrate übrig – über den Tag mit Reis, Kartoffeln, Brot, Obst oder Haferflocken auffüllen', P:0, F:0, C:carbGap, kc:kc});
+    tot.C+=carbGap; tot.kc+=kc;
+  }
   // Fettlücke füllen (Gerichte sind mager) -> Kalorien treffen das Ziel
   const fatGap = Math.round(t.fat - tot.F);
   if(fatGap >= 5){ const kc=fatGap*9;
